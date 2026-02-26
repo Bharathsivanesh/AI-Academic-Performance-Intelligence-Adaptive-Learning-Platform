@@ -3,7 +3,8 @@ import LoginPage from '../../../features/auth/Login'
 
 const Login = () => {
   return (
-    <div><LoginPage /></div>
+    <div>
+      <LoginPage /></div>
   )
 }
 
