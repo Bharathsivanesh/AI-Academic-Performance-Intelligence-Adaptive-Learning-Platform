@@ -7,6 +7,7 @@ import InputField from "../../components/Inputfields";
 import Loader from "../../components/Loader";
 import { showToast } from "../../components/Notification";
 import { apiService } from "../../service/Apicall";
+import Sidebar from "../../components/Sidebar";
 
 
 export default function LoginPage() {
@@ -42,6 +43,7 @@ export default function LoginPage() {
   return (
   <div className="relative min-h-screen flex items-center justify-center text-white px-4 bg-[#0b1220] overflow-hidden">
  {/* <Loader visible={loading} /> sample loader  */} 
+
   {/* Top Left Glow */}
   <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-[#1e3a8a] opacity-30 blur-[150px] rounded-full"></div>
 
