@@ -8,26 +8,6 @@ export const sidebarMenu = [
   {
     label: "Dashboard",
     icon: DashboardIcon,
-    path: "/admin/dashboard",
-  },
-  {
-    label: "Staff Management",
-    icon: GroupIcon,
-    path: "/admin/staff",
-  },
-  {
-    label: "Student Management",
-    icon: SchoolIcon,
-    path: "/admin/students",
-  },
-  {
-    label: "Subject Mapping",
-    icon: MenuBookIcon,
-    path: "/admin/subjects",
-  },
-  {
-    label: "System Logs",
-    icon: DescriptionIcon,
-    path: "/admin/logs",
-  },
+    path: "/admin",
+  }
 ];
