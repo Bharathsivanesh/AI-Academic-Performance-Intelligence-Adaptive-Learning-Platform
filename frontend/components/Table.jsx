@@ -18,14 +18,20 @@ export default function CommonTable({
   columns = [],
   rows = [],
   limit = 5,
+  searchText = "", 
 }) {
   const [page, setPage] = useState(1);
-
-  const totalPages = Math.ceil(rows.length / limit);
+const filteredRows = rows.filter((row) =>
+  Object.values(row)
+    .join(" ")
+    .toLowerCase()
+    .includes(searchText.toLowerCase())
+);
+const totalPages = Math.ceil(filteredRows.length / limit);
   const startIndex = (page - 1) * limit;
-  const endIndex = Math.min(startIndex + limit, rows.length);
+const endIndex = Math.min(startIndex + limit, filteredRows.length);
 
-  const currentRows = rows.slice(startIndex, endIndex);
+  const currentRows = filteredRows.slice(startIndex, endIndex);
 
   const handlePrev = () => {
     if (page > 1) setPage(page - 1);
@@ -94,7 +100,7 @@ export default function CommonTable({
       <div className="flex items-center justify-between px-6 mt-4 text-sm text-gray-400">
         {/* Left Info */}
         <div>
-          Showing {startIndex + 1} to {endIndex} of {rows.length} entries
+        Showing {startIndex + 1} to {endIndex} of {filteredRows.length} entries
         </div>
 
         {/* Right Controls */}

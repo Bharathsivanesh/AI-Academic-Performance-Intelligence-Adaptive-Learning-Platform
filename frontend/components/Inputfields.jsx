@@ -23,10 +23,10 @@ export default function InputField({
         borderColor: "rgba(255,255,255,0.1)",
       },
       "&:hover fieldset": {
-        borderColor: "#10b981",
+        borderColor: "#0459f6",
       },
       "&.Mui-focused fieldset": {
-        borderColor: "#10b981",
+        borderColor: "#0459f6",
       },
     },
     "& .MuiInputBase-input::placeholder": {
