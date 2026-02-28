@@ -9,6 +9,8 @@ export default function DynamicFormCard({
   fields = [],
   buttonText = "Submit",
   onSubmit,
+   formData,
+  handleChange,
 }) {
   return (
     <div className="bg-gradient-to-br from-[#111827] to-[#0f172a] 
@@ -21,16 +23,21 @@ export default function DynamicFormCard({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {fields.map((field, index) => (
-          <InputField
-            key={index}
-            type={field.type}
-            label={field.label}
-            placeholder={field.placeholder}
-            mandatory={field.mandatory}
-            onChange={field.onChange}
-            className={field.fullWidth ? "md:col-span-2" : ""}
-          />
-        ))}
+  <InputField
+    key={index}
+    name={field.name}
+    type={field.type}
+    label={field.label}
+    placeholder={field.placeholder}
+    mandatory={field.mandatory}
+    value={formData[field.name]}
+    disabled={field.disabled}
+    onChange={(e) =>
+      handleChange(field.name, e.target.value)
+    }
+    className={field.fullWidth ? "md:col-span-2" : ""}
+  />
+))}
 
         <div className="md:col-span-2 flex justify-end">
       <Button

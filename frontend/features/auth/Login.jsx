@@ -8,6 +8,7 @@ import Loader from "../../components/Loader";
 import { showToast } from "../../components/Notification";
 import { apiService } from "../../service/Apicall";
 import Sidebar from "../../components/Sidebar";
+import { useRouter } from "next/navigation";
 
 
 export default function LoginPage() {
@@ -20,9 +21,11 @@ export default function LoginPage() {
   const handleChange = (field) => (event) => {
     setForm({ ...form, [field]: event.target.value });
   };
-
+  const router = useRouter();
   const handleSubmit = async() => {
+    localStorage.setItem("token", "abc");
     console.log(form, role);
+     router.replace("/admin")
     //  showToast("Login successful!", "success"); sample Notification
   //  try {
   //     await apiService({
