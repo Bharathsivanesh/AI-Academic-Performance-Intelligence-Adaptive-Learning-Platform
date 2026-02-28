@@ -9,5 +9,18 @@ export const sidebarMenu = [
     label: "Dashboard",
     icon: DashboardIcon,
     path: "/admin",
+    role:"admin"
+  },
+    {
+    label: "Overview",
+    icon: DashboardIcon,
+    path: "/staff",
+    role:"staff"
+  },
+     {
+    label: "Students",
+    icon: DashboardIcon,
+    path: "/staff/studententry",
+    role:"staff"
   }
 ];

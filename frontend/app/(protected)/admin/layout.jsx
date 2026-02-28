@@ -5,7 +5,7 @@ export default function AdminLayout({ children }) {
   return (
     <div className="flex h-screen bg-[#0F172A]">
       {/* 🔹 LEFT SIDEBAR */}
-      <Sidebar />
+      <Sidebar role="admin" />
 
       {/* 🔹 RIGHT SIDE */}
       <div className="flex-1 flex flex-col">

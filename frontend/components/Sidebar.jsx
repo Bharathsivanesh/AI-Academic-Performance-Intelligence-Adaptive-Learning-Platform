@@ -5,10 +5,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { Box, Typography } from "@mui/material";
 import { sidebarMenu } from "../app/utils/Jsons/Sidebaradmin";
 
-export default function Sidebar() {
+export default function Sidebar({role}) {
   const pathname = usePathname();
   const router = useRouter();
-
+const filteredMenu = sidebarMenu.filter(
+  (item) => item.role === role
+);
   return (
     <Box className="w-64 h-screen bg-[#0B1120] flex flex-col justify-between p-4 border-r border-white/5">
       
@@ -31,7 +33,7 @@ export default function Sidebar() {
 
       {/* 🔹 CENTER MENU (DYNAMIC) */}
       <Box className="flex-1">
-        {sidebarMenu.map((item, index) => {
+        {filteredMenu.map((item, index) => {
           const isActive = pathname === item.path;
           const Icon = item.icon;
 
