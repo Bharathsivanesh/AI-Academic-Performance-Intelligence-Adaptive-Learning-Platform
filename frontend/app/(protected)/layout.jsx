@@ -1,5 +1,10 @@
-"use client";
+import AuthWrapper from "../../components/AuthWrapper";
+
 
 export default function ProtectedLayout({ children }) {
-  return <>{children}</>;
+  return (
+    <AuthWrapper>
+      {children}
+    </AuthWrapper>
+  );
 }

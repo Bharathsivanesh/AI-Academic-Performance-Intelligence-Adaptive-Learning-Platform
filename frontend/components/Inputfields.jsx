@@ -11,29 +11,48 @@ export default function InputField({
   mandatory = false,
   onChange,
   className = "",
+   value,
+  disabled = false,
+  name,
+  startIcon,   
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
-  const baseStyles = {
-    "& .MuiOutlinedInput-root": {
+const baseStyles = {
+  "& .MuiOutlinedInput-root": {
+    color: "#fff",
+    backgroundColor: "#0f1c2e",
+    borderRadius: "12px",
+
+    "& fieldset": {
+      borderColor: "rgba(255,255,255,0.1)",
+    },
+
+    "&:hover fieldset": {
+      borderColor: "#0459f6",
+    },
+
+    "&.Mui-focused fieldset": {
+      borderColor: "#0459f6",
+    },
+
+    // 👇 ADD THIS
+    "&.Mui-disabled": {
       color: "#fff",
+      WebkitTextFillColor: "#fff", // VERY IMPORTANT for disabled text
       backgroundColor: "#0f1c2e",
-      borderRadius: "12px",
-      "& fieldset": {
-        borderColor: "rgba(255,255,255,0.1)",
-      },
-      "&:hover fieldset": {
-        borderColor: "#0459f6",
-      },
-      "&.Mui-focused fieldset": {
-        borderColor: "#0459f6",
-      },
     },
-    "& .MuiInputBase-input::placeholder": {
-      color: "#9ca3af",
-      opacity: 1,
-    },
-  };
+  },
+
+  "& .MuiInputBase-input.Mui-disabled": {
+    WebkitTextFillColor: "#fff",
+  },
+
+  "& .MuiInputBase-input::placeholder": {
+    color: "#9ca3af",
+    opacity: 1,
+  },
+};
 
   const renderField = () => {
     switch (type) {
@@ -47,13 +66,16 @@ export default function InputField({
             variant="outlined"
             size="medium"
             onChange={onChange}
+            value={value}
+             name={name}
+  disabled={disabled}
             sx={baseStyles}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
                     onClick={() => setShowPassword(!showPassword)}
-                    edge="end"
+                    edge="  end"
                   >
                     {showPassword ? (
                       <VisibilityOff sx={{ color: "#6b7280" }} />
@@ -71,6 +93,7 @@ export default function InputField({
         return (
           <TextField
             fullWidth
+             name={name}
             required={mandatory}
             type="number"
             placeholder={placeholder}
@@ -78,6 +101,8 @@ export default function InputField({
             size="medium"
             onChange={onChange}
             sx={baseStyles}
+            value={value}
+  disabled={disabled}
           />
         );
 
@@ -85,6 +110,7 @@ export default function InputField({
         return (
           <TextField
             fullWidth
+             name={name}
             required={mandatory}
             type="email"
             placeholder={placeholder}
@@ -92,12 +118,16 @@ export default function InputField({
             size="medium"
             onChange={onChange}
             sx={baseStyles}
+            value={value}
+  disabled={disabled}
           />
         );
 
       default:
         return (
+          
           <TextField
+           name={name}
             fullWidth
             required={mandatory}
             type="text"
@@ -105,7 +135,16 @@ export default function InputField({
             variant="outlined"
             size="medium"
             onChange={onChange}
+            value={value}
+  disabled={disabled}
             sx={baseStyles}
+             InputProps={{
+    startAdornment: startIcon ? (
+      <InputAdornment position="start">
+        {startIcon}
+      </InputAdornment>
+    ) : null,
+  }}
           />
         );
     }

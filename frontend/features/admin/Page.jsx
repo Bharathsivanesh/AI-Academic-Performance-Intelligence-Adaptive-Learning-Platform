@@ -2,7 +2,7 @@
 import { Avatar, Chip, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-
+import SearchIcon from "@mui/icons-material/Search";
 import StatCard from "./components/Overviewcards";
 
 import GroupsIcon from "@mui/icons-material/Groups";
@@ -138,12 +138,51 @@ export default function AdminPage() {
       icon: MenuBookIcon,
     },
   ];
-const studentFields = [
-  { label: "Student Name", mandatory: true ,placeholder:"Enter full name"},
-  { label: "Register Number", mandatory: true ,placeholder:"Enter unique register number"},
-  { type: "email", label: "Email" ,placeholder:"Enter email address"},
+    const [formData, setFormData] = useState({
+    staffName: "",
+    registerNumber: "",
+    department: "",
+    role: "Staff", // default value
+  });
+  
+  
+  const handleChange = (name, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+const staffFields = [
+  {
+    name: "staffName",
+    label: "Staff Name",
+    placeholder: "Enter full name",
+    mandatory: true,
+  },
+  {
+    name: "registerNumber",
+    label: "Register Number",
+    placeholder: "Enter unique register number",
+    mandatory: true,
+  },
+  {
+    name: "department",
+    label: "Department",
+    placeholder: "Enter department name",
+    mandatory: true,
+  },
+    {
+    name: "Password",
+    label: "Password",
+    placeholder: "Enter password",
+    mandatory: true,
+  },
+
 ];
   const [searchText, setSearchText] = useState("");
+    const handleSubmit = () => {
+    console.log(formData);
+  };
   return (
     <div className="p-8  bg-[#0b1220] min-h-screen text-white">
       {/* <h2 className="text-xl font-semibold mb-6">
@@ -156,78 +195,59 @@ const studentFields = [
         limit={2}
       /> */}
       <div className="flex flex-col gap-4">
-
-    
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {statsData.map((card, index) => (
-          <StatCard
-            key={index}
-            title={card.title}
-            value={card.value}
-            icon={card.icon}
-            growth={card.growth}
-            growthText={card.growthText}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {statsData.map((card, index) => (
+            <StatCard
+              key={index}
+              title={card.title}
+              value={card.value}
+              icon={card.icon}
+              growth={card.growth}
+              growthText={card.growthText}
+            />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <UploadCard
+            title="Bulk Upload Staff"
+            description="Drop your CSV file here"
+            buttonText="Browse Files"
+            onFileSelect={(file) => console.log(file)}
           />
-        ))}
-      </div>
-       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <UploadCard
-          title="Bulk Upload Staff"
-          description="Drop your CSV file here"
-          buttonText="Browse Files"
-          onFileSelect={(file) => console.log(file)}
-        />
+          <div className="lg:col-span-2">
+            <DynamicFormCard
+              title="Manual Entry"
+              fields={staffFields}
+              buttonText="Add Staff"
+                   onSubmit={handleSubmit}
+      formData={formData}
+      handleChange={handleChange}
 
-        <div className="lg:col-span-2">
-          <DynamicFormCard
-            title="Manual Entry"
-            fields={studentFields}
-            buttonText="Add Staff"
-            onSubmit={() => console.log("Submit clicked")}
+            />
+          </div>
+        </div>
+        <div className="flex justify-between items-center ">
+          <h2 className="text-xl w-2/3 font-semibold">
+            Existing Staff Directory
+          </h2>
+
+          <InputField
+            placeholder="Search by name, ID or department.."
+             startIcon={<SearchIcon sx={{ color: "#9ca3af" }} />}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+             className="max-w-md rounded-lg"
           />
         </div>
 
-      </div>
-    <div className="flex justify-between items-center ">
-        <h2 className="text-xl w-2/3 font-semibold">
-          Existing Staff Directory
-        </h2>
-
-        <InputField
-          placeholder="Search by name, ID or department..."
-          size="small"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          sx={{
-            width: 300,
-            "& .MuiOutlinedInput-root": {
-              color: "#fff",
-              backgroundColor: "#0f1c2e",
-              borderRadius: "12px",
-              "& fieldset": {
-                borderColor: "rgba(255,255,255,0.1)",
-              },
-              "&:hover fieldset": {
-                borderColor: "#3b82f6",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "#3b82f6",
-              },
-            },
-          }}
+        <CommonTable
+          columns={columns}
+          rows={rows}
+          limit={2}
+          searchText={searchText} // ✅ PASS HERE
         />
       </div>
-
-      <CommonTable
-        columns={columns}
-        rows={rows}
-        limit={2}
-        searchText={searchText}   // ✅ PASS HERE
-      />
     </div>
-        </div>
-
-        
   );
 }
