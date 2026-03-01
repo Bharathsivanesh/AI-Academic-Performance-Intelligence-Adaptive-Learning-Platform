@@ -15,6 +15,7 @@ export default function InputField({
   disabled = false,
   name,
   startIcon,   
+  options = [],
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -88,7 +89,33 @@ const baseStyles = {
             }}
           />
         );
-
+     case "select":
+  return (
+    <TextField
+      select
+      fullWidth
+      name={name}
+      required={mandatory}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      variant="outlined"
+      size="medium"
+      sx={baseStyles}
+      SelectProps={{
+        native: true, // makes it simple HTML select
+      }}
+    >
+      <option value="" disabled>
+        {placeholder || "Select option"}
+      </option>
+      {options?.map((option, index) => (
+        <option key={index} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </TextField>
+  );
       case "number":
         return (
           <TextField
