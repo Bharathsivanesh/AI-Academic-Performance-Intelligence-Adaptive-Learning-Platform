@@ -28,5 +28,11 @@ export const sidebarMenu = [
     icon: DashboardIcon,
     path: "/staff/analytics",
     role:"staff"
+  },
+         {
+    label: "Performance",
+    icon: DashboardIcon,
+    path: "/staff/performance",
+    role:"staff"
   }
 ];
