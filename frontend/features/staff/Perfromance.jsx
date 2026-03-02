@@ -1,24 +1,21 @@
 "use client";
+import React, { useState } from 'react'
+import InputField from '../../components/Inputfields'
+import HighPerformersCard from './components.jsx/HighPerformersCard';
+import UnderPerformersCard from './components.jsx/UnderPerformersCard';
 
-import { useState } from "react";
-import InputField from "../../components/Inputfields";
-import ClassProficiencyChart from "./components.jsx/ClassSubjectPerformanceChart";
-import TopicMasteryChart from "./components.jsx/TopicMasteryChart";
-
-
-const StudentAnalytics = () => {
-  const [filters, setFilters] = useState({
-    examStage: "",
-    subject: "",
-    module: "",
-  });
-
-  const handleChange = (e) => {
-    setFilters({ ...filters, [e.target.name]: e.target.value });
-  };
-
+const StudentPerfromance = () => {
+      const [filters, setFilters] = useState({
+        examStage: "",
+        subject: "",
+        module: "",
+      });
+    
+      const handleChange = (e) => {
+        setFilters({ ...filters, [e.target.name]: e.target.value });
+      };
   return (
- <div className="min-h-screen w-full bg-[#0b1220] p-6">
+     <div className="min-h-screen w-full bg-[#0b1220] p-6">
   <div className="bg-[#0b1624] flex flex-col h-full rounded-2xl shadow-lg">
     
     {/* Header Row */}
@@ -80,22 +77,17 @@ const StudentAnalytics = () => {
       </div>
     </div>
 
-    {/* Charts Section */}
-    <div className="flex flex-1 gap-6 p-6">
-      
-      <div className="w-1/2 h-full">
-        <ClassProficiencyChart />
-      </div>
+    <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <HighPerformersCard />
+  <UnderPerformersCard />
+</div>
 
-      <div className="w-1/2 h-full">
-        <TopicMasteryChart />
-      </div>
-
-    </div>
+  
+   
 
   </div>
 </div>
-  );
-};
+  )
+}
 
-export default StudentAnalytics;
+export default StudentPerfromance
