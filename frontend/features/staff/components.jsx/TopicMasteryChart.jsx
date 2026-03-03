@@ -31,12 +31,20 @@ const DoughnutChart = ({ value, color, label }) => {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="w-24">
-        <Doughnut data={data} options={options} />
+    <div className="relative w-24 h-24">
+      <Doughnut data={data} options={options} />
+
+      {/* Center Percentage */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <p className="text-white font-semibold text-sm">
+          {value}%
+        </p>
       </div>
-      <p className="text-white mt-2 font-semibold">{value}%</p>
-      <p className="text-gray-400 text-xs">{label}</p>
     </div>
+
+    <p className="text-gray-400 text-xs mt-2">{label}</p>
+  </div>
+
   );
 };
 

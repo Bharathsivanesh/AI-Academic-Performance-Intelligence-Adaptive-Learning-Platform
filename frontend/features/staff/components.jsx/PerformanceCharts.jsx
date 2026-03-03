@@ -87,7 +87,7 @@ export default function PerformanceCharts() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
       {/* LEFT CARD */}
       <div
         className="bg-gradient-to-br from-[#111827] to-[#0f172a]

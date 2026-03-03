@@ -3,7 +3,7 @@
 import { TextField, InputAdornment, IconButton } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useState } from "react";
-
+import { MenuItem } from "@mui/material";
 export default function InputField({
   type = "text",
   placeholder = "",
@@ -89,34 +89,88 @@ const baseStyles = {
             }}
           />
         );
-     case "select":
+  
+case "select":
   return (
     <TextField
       select
       fullWidth
       name={name}
       required={mandatory}
-      value={value}
+      value={value || ""}
       onChange={onChange}
       disabled={disabled}
       variant="outlined"
       size="medium"
-      sx={baseStyles}
+      sx={{
+        ...baseStyles,
+
+        // Blue border
+        "& .MuiOutlinedInput-root": {
+          ...baseStyles["& .MuiOutlinedInput-root"],
+          "& fieldset": {
+            borderColor: "#0459f6",
+          },
+        },
+
+        // Dropdown icon white
+        "& .MuiSvgIcon-root": {
+          color: "#fff",
+        },
+      }}
       SelectProps={{
-        native: true, // makes it simple HTML select
+        displayEmpty: true,
+        renderValue: (selected) => {
+          if (!selected) {
+            return (
+              <span style={{ color: "#fff" }}>
+                {placeholder || "Select option"}
+              </span>
+            );
+          }
+
+          const selectedOption = options.find(
+            (opt) => opt.value === selected
+          );
+          return selectedOption?.label;
+        },
+        MenuProps: {
+          PaperProps: {
+            sx: {
+              backgroundColor: "#0f1c2e",
+              color: "#fff",
+            },
+          },
+        },
       }}
     >
-      <option value="" disabled>
+      <MenuItem value="" disabled>
         {placeholder || "Select option"}
-      </option>
+      </MenuItem>
+
       {options?.map((option, index) => (
-        <option key={index} value={option.value}>
+        <MenuItem  sx={{
+      color: "#fff",
+      "&:hover": {
+        backgroundColor: "#3b76e2", // blue hover
+      },
+      "&.Mui-selected": {
+        backgroundColor: "#0459f6",
+      },
+      "&.Mui-selected:hover": {
+        backgroundColor: "#0459f6",
+      },
+    }} key={index} value={option.value}>
           {option.label}
-        </option>
+        </MenuItem>
       ))}
     </TextField>
   );
-      case "number":
+    
+  
+  
+  
+  case "number":
         return (
           <TextField
             fullWidth
