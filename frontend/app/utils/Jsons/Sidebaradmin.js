@@ -1,9 +1,7 @@
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import GroupIcon from "@mui/icons-material/Group";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import AnalyticsIcon from "@mui/icons-material/Analytics";
 import SchoolIcon from "@mui/icons-material/School";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import DescriptionIcon from "@mui/icons-material/Description";
-
 export const sidebarMenu = [
   {
     label: "Dashboard",
@@ -18,21 +16,21 @@ export const sidebarMenu = [
     role:"staff"
   },
      {
-    label: "Students",
-    icon: DashboardIcon,
-    path: "/staff/studententry",
-    role:"staff"
-  },
-       {
-    label: "Analytics",
-    icon: DashboardIcon,
-    path: "/staff/analytics",
-    role:"staff"
-  },
-         {
-    label: "Performance",
-    icon: DashboardIcon,
-    path: "/staff/performance",
-    role:"staff"
-  }
+  label: "Students",
+  icon: SchoolIcon,
+  path: "/staff/studententry",
+  role: "staff",
+},
+{
+  label: "Analytics",
+  icon: AnalyticsIcon,
+  path: "/staff/analytics",
+  role: "staff",
+},
+{
+  label: "Performance",
+  icon: TrendingUpIcon,
+  path: "/staff/performance",
+  role: "staff",
+}
 ];

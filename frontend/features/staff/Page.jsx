@@ -6,6 +6,7 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import PerformanceCharts from "./components.jsx/PerformanceCharts";
+import DashboardHeader from "./components.jsx/DashboardHeader";
 const statsData = [
   {
     title: "Total Students",
@@ -39,15 +40,22 @@ const statsData = [
   },
 ];
 const StaffPage = () => {
-  return (
-    <div className="p-8 bg-[#0b1220] min-h-screen">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+  
+     return (
+    <div className=" bg-[#0b1220] px-4 min-h-screen">
+      
+      <DashboardHeader />
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
         {statsData.map((card, index) => (
           <DashboardStatCard key={index} {...card} />
         ))}
       </div>
+
       <PerformanceCharts />
     </div>
+  
+
   );
 };
 
