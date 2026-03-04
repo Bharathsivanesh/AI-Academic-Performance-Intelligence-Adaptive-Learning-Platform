@@ -1,8 +1,10 @@
 import React from 'react'
+import Studentpage from '../../../features/student/page'
+
 
 const page = () => {
   return (
-    <div>page</div>
+    <div><Studentpage/></div>
   )
 }
 
