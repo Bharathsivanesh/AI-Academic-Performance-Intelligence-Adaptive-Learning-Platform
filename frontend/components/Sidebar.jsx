@@ -12,7 +12,7 @@ const filteredMenu = sidebarMenu.filter(
   (item) => item.role === role
 );
   return (
-    <Box className="w-64 h-screen bg-[#0B1120] flex flex-col justify-between p-4 border-r border-white/5">
+    <Box className="w-64 h-full bg-[#0B1120] flex flex-col justify-between p-4 border-r border-white/5">
       
       {/* 🔹 TOP SECTION */}
       <Box className="mb-8 p-3">
@@ -21,10 +21,10 @@ const filteredMenu = sidebarMenu.filter(
             AI
           </div>
           <div>
-            <Typography className="text-white font-semibold text-sm">
+            <Typography className="text-white whitespace-nowrap font-semibold text-sm">
               AI Academic
             </Typography>
-            <Typography className="text-gray-400 text-xs">
+            <Typography className="text-gray-400 whitespace-nowrap text-xs">
               Super Admin Panel
             </Typography>
           </div>

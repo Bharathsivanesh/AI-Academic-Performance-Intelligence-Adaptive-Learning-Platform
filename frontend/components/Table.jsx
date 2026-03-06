@@ -18,18 +18,21 @@ export default function CommonTable({
   columns = [],
   rows = [],
   limit = 5,
-  searchText = "", 
+  searchText = "",
 }) {
   const [page, setPage] = useState(1);
-const filteredRows = rows.filter((row) =>
-  Object.values(row)
-    .join(" ")
-    .toLowerCase()
-    .includes(searchText.toLowerCase())
-);
-const totalPages = Math.ceil(filteredRows.length / limit);
+
+  const filteredRows = rows.filter((row) =>
+    Object.values(row)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchText.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredRows.length / limit);
+
   const startIndex = (page - 1) * limit;
-const endIndex = Math.min(startIndex + limit, filteredRows.length);
+  const endIndex = Math.min(startIndex + limit, filteredRows.length);
 
   const currentRows = filteredRows.slice(startIndex, endIndex);
 
@@ -49,61 +52,92 @@ const endIndex = Math.min(startIndex + limit, filteredRows.length);
         borderRadius: 3,
         border: "1px solid rgba(255,255,255,0.05)",
         paddingBottom: 2,
+        width: "100%",
+        maxWidth: "100%",
+        overflow: "hidden",
       }}
     >
-      <TableContainer>
-        <Table sx={{
-    "& .MuiTableCell-root": {
-      borderBottom: "none",   // ❌ remove white line
-    },
-        // ✅ Header background darker
-    "& .MuiTableHead-root": {
-      backgroundColor: "#1e3a8a", // darker than body
-    },
+      {/* SCROLL WRAPPER */}
+      <div style={{ width: "100%" }}>
+        <TableContainer
+          sx={{
+            width: "100%",
+            maxWidth: "100%",
+             overflowX: "auto",
+          }}
+        >
+          <Table
+            sx={{
+              width: "100%",
+             // smaller width for mobile
+  
+              "& .MuiTableCell-root": {
+                borderBottom: "none",
+                whiteSpace: "nowrap",
+              },
 
-    // ✅ Border only for header row
-    "& .MuiTableHead-root .MuiTableCell-root": {
-      borderBottom: "1px solid rgba(255,255,255,0.08)",
-    },
+              "& .MuiTableHead-root": {
+                backgroundColor: "#1e3a8a",
+              },
 
-  }}>
-          <TableHead>
-            <TableRow>
-              {columns.map((col, index) => (
-                <TableCell
-                  key={index}
-                  sx={{ color: "#d0d2d5", fontWeight: 600 }}
-                >
-                  {col.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {currentRows.map((row, rowIndex) => (
-              <TableRow key={rowIndex}>
-                {columns.map((col, colIndex) => (
-                  <TableCell key={colIndex} sx={{ color: "#e5e7eb" }}>
-                    {col.render
-                      ? col.render(row)
-                      : row[col.field]}
+              "& .MuiTableHead-root .MuiTableCell-root": {
+                borderBottom: "1px solid rgba(255,255,255,0.08)",
+              },
+            }}
+          >
+            {/* HEADER */}
+            <TableHead>
+              <TableRow>
+                {columns.map((col, index) => (
+                  <TableCell
+                    key={index}
+                    sx={{ color: "#d0d2d5", fontWeight: 600 }}
+                  >
+                    {col.label}
                   </TableCell>
                 ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
 
-      {/* ✅ Custom Pagination */}
-      <div className="flex items-center justify-between px-6 mt-4 text-sm text-gray-400">
-        {/* Left Info */}
+            {/* BODY */}
+            {/* <TableBody>
+              {currentRows.map((row, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  {columns.map((col, colIndex) => (
+                    <TableCell key={colIndex} sx={{ color: "#e5e7eb" }}>
+                      {col.render ? col.render(row) : row[col.field]}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody> */}
+          
+          
+          </Table>
+        </TableContainer>
+      </div>
+
+      {/* PAGINATION */}
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between px-6 mt-4 text-sm text-gray-400 gap-3">
         <div>
-        Showing {startIndex + 1} to {endIndex} of {filteredRows.length} entries
+          Showing {startIndex + 1} to {endIndex} of {filteredRows.length} entries
         </div>
 
-        {/* Right Controls */}
         <div className="flex items-center gap-2">
           <IconButton
             size="small"
@@ -116,6 +150,7 @@ const endIndex = Math.min(startIndex + limit, filteredRows.length);
 
           {[...Array(totalPages)].map((_, index) => {
             const pageNumber = index + 1;
+
             return (
               <button
                 key={pageNumber}

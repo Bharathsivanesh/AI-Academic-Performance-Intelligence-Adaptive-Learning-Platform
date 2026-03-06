@@ -77,30 +77,35 @@ export default function LoginPage() {
 
           {/* MUI Toggle Buttons */}
           <ToggleButtonGroup
-            value={role}
-            exclusive
-            onChange={(e, newValue) => newValue && setRole(newValue)}
-            fullWidth
-            sx={{
-              mb: 3,
-              p:0.8,
-              backgroundColor: "#0f1c2e",
-              borderRadius: "10px",
-              "& .MuiToggleButton-root": {
-                color: "#9ca3af",
-                border: "none",
-              },
-              "& .Mui-selected": {
-                background: "linear-gradient(to right, #10b981, #2563eb)",
-                color: "#fff",
-                borderRadius: "6px",
-              },
-            }}
-          >
-            <ToggleButton value="superadmin">Super Admin</ToggleButton>
-            <ToggleButton value="staff">Staff</ToggleButton>
-            <ToggleButton value="student">Student</ToggleButton>
-          </ToggleButtonGroup>
+  value={role}
+  exclusive
+  onChange={(e, newValue) => newValue && setRole(newValue)}
+  fullWidth
+  sx={{
+    mb: 3,
+    p: 0.8,
+    backgroundColor: "#0f1c2e",
+    borderRadius: "10px",
+    display: "flex",
+    "& .MuiToggleButton-root": {
+      color: "#9ca3af",
+      border: "none",
+      flex: 1,
+      fontSize: { xs: "11px", sm: "14px" }, 
+      padding: { xs: "6px 4px", sm: "8px 12px" }, 
+      whiteSpace: "nowrap",
+    },
+    "& .Mui-selected": {
+      background: "linear-gradient(to right, #10b981, #2563eb)",
+      color: "#fff",
+      borderRadius: "6px",
+    },
+  }}
+>
+  <ToggleButton value="superadmin">Super Admin</ToggleButton>
+  <ToggleButton value="staff">Staff</ToggleButton>
+  <ToggleButton value="student">Student</ToggleButton>
+</ToggleButtonGroup>
 
           {/* ID Field */}
           <div className="flex flex-col gap-6">

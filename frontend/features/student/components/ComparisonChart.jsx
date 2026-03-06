@@ -41,6 +41,7 @@ const ComparisonChart = () => {
   };
 
   const options = {
+    responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
@@ -82,9 +83,9 @@ const ComparisonChart = () => {
       </div>
 
       {/* Chart */}
-      <div className="h-[360px] px-6 pt-6">
-        <Bar data={data} options={options} />
-      </div>
+      <div className="h-[360px] w-full overflow-hidden px-6">
+  <Bar data={data} options={options} />
+</div>
 
       {/* Insight Box */}
       <div className="border-t border-white/10 p-5 flex items-start gap-3">
