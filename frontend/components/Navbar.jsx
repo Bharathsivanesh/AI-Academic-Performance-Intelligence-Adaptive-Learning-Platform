@@ -8,25 +8,38 @@ import {
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import LogoutIcon from "@mui/icons-material/Logout";
+import MenuIcon from "@mui/icons-material/Menu";
 import { useRouter } from "next/navigation";
 
 export default function Navbar({
   userName = "Admin User",
   role = "SUPER ADMIN",
+  onMenuClick,
 }) {
   const router = useRouter();
 
   const handleLogout = () => {
-    // TODO: Add logout logic
     router.push("/login");
   };
 
   return (
-    <div className="w-full h-16 bg-[#0B1120] border-b border-white/5 flex items-center justify-end px-6">
-      
-      <div className="flex items-center gap-6">
+    <div className="w-full  h-16 bg-[#0B1120] border-b border-white/5 flex items-center justify-between px-4 md:px-6">
 
-        {/* 🔵 Role Badge */}
+      {/* LEFT SIDE */}
+      <div className="flex items-center gap-3">
+        <IconButton
+          onClick={onMenuClick}
+          sx={{ display: { xs: "block", md: "none" }, color: "#fff" }}
+        >
+          <MenuIcon />
+        </IconButton>
+
+
+      </div>
+
+      {/* RIGHT SIDE */}
+      <div className="flex items-center gap-4 md:gap-6">
+
         <Chip
           label={role}
           size="small"
@@ -35,21 +48,19 @@ export default function Navbar({
             color: "#fff",
             fontWeight: 600,
             fontSize: "11px",
-            padding:2,
+            padding: 2,
             letterSpacing: "0.5px",
-            borderRadius:"10px"
+            borderRadius: "10px",
           }}
         />
 
-        {/* 🔔 Notification */}
         <IconButton>
           <Badge badgeContent={3} color="error">
             <NotificationsIcon sx={{ color: "#ffffff" }} />
           </Badge>
         </IconButton>
 
-        {/* 👤 User Info */}
-        <div className="flex items-center gap-3 border-l border-white/10 pl-6">
+        <div className="flex items-center gap-3 border-l border-white/10 pl-4 md:pl-6">
           <Avatar
             sx={{
               width: 36,
@@ -64,16 +75,14 @@ export default function Navbar({
               .join("")}
           </Avatar>
 
-          <span className="text-white text-sm font-medium">
+          <span className="text-white text-sm font-medium hidden sm:block">
             {userName}
           </span>
 
-          {/* 🚪 Logout */}
           <IconButton onClick={handleLogout}>
             <LogoutIcon sx={{ color: "#3B82F6" }} />
           </IconButton>
         </div>
-
       </div>
     </div>
   );

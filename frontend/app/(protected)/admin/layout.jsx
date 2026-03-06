@@ -1,20 +1,52 @@
+"use client";
+
+import { useState } from "react";
+import { Drawer } from "@mui/material";
 import Sidebar from "../../../components/Sidebar";
 import Navbar from "../../../components/Navbar";
 
 export default function AdminLayout({ children }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen((prev) => !prev);
+  };
+
   return (
-    <div className="flex h-screen bg-[#0F172A]">
-      {/* 🔹 LEFT SIDEBAR */}
-      <Sidebar role="admin" />
+    <div className="flex h-full bg-[#0F172A]">
 
-      {/* 🔹 RIGHT SIDE */}
+      {/* ✅ DESKTOP SIDEBAR */}
+      <div className="hidden md:block">
+        <Sidebar role="admin" />
+      </div>
+
+      {/* ✅ MOBILE DRAWER */}
+      <Drawer
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        variant="temporary"
+        sx={{
+          display: { xs: "block", md: "none" },
+          "& .MuiDrawer-paper": {
+            width: 260,
+            backgroundColor: "#0B1120",
+            borderRight: "none",
+          },
+        }}
+      >
+        <Sidebar role="admin" />
+      </Drawer>
+
+      {/* RIGHT SIDE */}
       <div className="flex-1 flex flex-col">
-        
-        {/* 🔹 TOP NAVBAR */}
-        <Navbar userName="Bharath" role="SUPER ADMIN" />
 
-        {/* 🔹 PAGE CONTENT */}
-        <main className="flex-1  overflow-auto">
+        <Navbar
+          userName="Bharath"
+          role="STAFF"
+          onMenuClick={handleDrawerToggle}
+        />
+
+        <main className="flex-1 overflow-auto p-4">
           {children}
         </main>
 

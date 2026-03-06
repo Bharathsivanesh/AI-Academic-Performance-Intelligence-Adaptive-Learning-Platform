@@ -53,7 +53,7 @@ const TopicMasteryChart = () => {
     <div className="bg-[#0f1c2e] p-6 rounded-2xl shadow-md">
       <h2 className="text-white font-semibold mb-6">Topic Mastery</h2>
 
-      <div className="flex justify-between">
+      <div className="flex md:flex-row flex-col gap-4 justify-between">
         <DoughnutChart value={78} color="#2563eb" label="Concept Clarity" />
         <DoughnutChart value={48} color="#f59e0b" label="Problem Solving" />
         <DoughnutChart value={68} color="#22c55e" label="Retention Score" />

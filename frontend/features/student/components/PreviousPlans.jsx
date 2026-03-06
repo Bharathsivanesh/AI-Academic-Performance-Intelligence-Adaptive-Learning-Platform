@@ -35,15 +35,11 @@ const plans = [
 
 const PreviousPlans = () => {
   return (
-    <div>
-      <div className="flex justify-between mb-4">
-        <h2 className="text-lg font-semibold">Previous Plans History</h2>
-        <button className="text-xs bg-white/10 px-3 py-1 rounded-md">
-          SELECT TO COMPARE
-        </button>
-      </div>
+   <div className="w-full overflow-x-auto">
 
-      <div className="flex gap-4 overflow-x-auto">
+   
+
+      <div className="flex gap-4 min-w-max">
         {plans.map((plan, i) => (
           <div
             key={i}
