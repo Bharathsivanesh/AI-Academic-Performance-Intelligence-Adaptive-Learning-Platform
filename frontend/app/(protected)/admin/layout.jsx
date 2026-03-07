@@ -42,7 +42,7 @@ export default function AdminLayout({ children }) {
 
         <Navbar
           userName="Bharath"
-          role="STAFF"
+          role="ADMIN"
           onMenuClick={handleDrawerToggle}
         />
 
