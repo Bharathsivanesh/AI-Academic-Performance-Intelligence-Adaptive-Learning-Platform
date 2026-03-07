@@ -81,7 +81,7 @@ const StudentAnalytics = () => {
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 md:p-6 flex-1">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-2 md:p-6 flex-1">
 
           <div className="w-full">
             <ClassProficiencyChart />

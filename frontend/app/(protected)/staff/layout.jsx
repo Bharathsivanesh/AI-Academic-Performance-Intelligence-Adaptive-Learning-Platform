@@ -37,7 +37,7 @@ export default function StaffLayout({ children }) {
       </Drawer>
 
       {/* RIGHT SIDE */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
 
         {/* NAVBAR */}
         <Navbar

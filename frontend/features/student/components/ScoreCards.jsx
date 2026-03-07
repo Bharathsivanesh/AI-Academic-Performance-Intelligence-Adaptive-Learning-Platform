@@ -2,7 +2,7 @@ import React from "react";
 
 const ScoreCards = () => {
   return (
-    <div className="grid grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 p-2 gap-6">
 
       {/* Initial Score */}
       <div className="bg-white/5 border border-white/10 rounded-xl p-6">

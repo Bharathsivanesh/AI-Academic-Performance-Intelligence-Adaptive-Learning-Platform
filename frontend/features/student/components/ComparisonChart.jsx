@@ -69,7 +69,7 @@ const ComparisonChart = () => {
   };
 
   return (
-    <div className="bg-[#111827] border border-white/10 rounded-xl">
+    <div className="bg-[#111827] border p-2 border-white/10 rounded-xl">
 
       {/* Header */}
       <div className="p-6 border-b border-white/10">

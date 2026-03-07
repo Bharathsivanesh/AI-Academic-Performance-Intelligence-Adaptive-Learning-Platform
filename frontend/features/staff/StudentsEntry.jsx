@@ -8,9 +8,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { Avatar, Chip, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import GroupsIcon from "@mui/icons-material/Groups";
-import PersonIcon from "@mui/icons-material/Person";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
+
 
 const StudentsEntry = () => {
   const [searchText, setSearchText] = useState("");

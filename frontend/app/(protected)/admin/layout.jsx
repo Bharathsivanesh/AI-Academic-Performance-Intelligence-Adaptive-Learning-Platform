@@ -38,7 +38,7 @@ export default function AdminLayout({ children }) {
       </Drawer>
 
       {/* RIGHT SIDE */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
 
         <Navbar
           userName="Bharath"
@@ -46,7 +46,7 @@ export default function AdminLayout({ children }) {
           onMenuClick={handleDrawerToggle}
         />
 
-        <main className="flex-1 overflow-auto p-4">
+        <main className="flex-1 overflow-auto ">
           {children}
         </main>
 

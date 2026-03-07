@@ -1,9 +1,9 @@
 "use client";
+
 import React from "react";
 import { Box } from "@mui/material";
 import StudyPlanCard from "./components/StudyPlanCard";
 import CreateCustomPlan from "./components/CreateCustomPlan";
-import PlanHistorySection from "./components/PlanHistorySection";
 import StudyPlanTimeline from "./components/PlanHistorySection";
 
 const plans = [
@@ -29,20 +29,29 @@ const plans = [
 
 const PlanDetails = () => {
   return (
-    <div className="w-full  p-8">
-      
+    <div className="w-full p-4 md:p-8">
+
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-sm tracking-widest text-gray-400 uppercase">
           Recent Study Plans
         </h2>
+
         <button className="text-blue-400 text-sm hover:underline">
           View All History →
         </button>
       </div>
 
       {/* Cards */}
-      <Box sx={{ display: "flex", gap: 3, overflowX: "auto", pb: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 3,
+          overflowX: "auto",
+          pb: 2,
+          flexWrap: { xs: "nowrap", md: "wrap" },
+        }}
+      >
         {plans.map((plan, index) => (
           <StudyPlanCard
             key={index}
@@ -54,7 +63,8 @@ const PlanDetails = () => {
         ))}
       </Box>
 
-      <CreateCustomPlan/>
+      <CreateCustomPlan />
+
       <StudyPlanTimeline />
     </div>
   );
