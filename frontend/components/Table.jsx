@@ -100,7 +100,7 @@ export default function CommonTable({
             </TableHead>
 
             {/* BODY */}
-            {/* <TableBody>
+            <TableBody>
               {currentRows.map((row, rowIndex) => (
                 <TableRow key={rowIndex}>
                   {columns.map((col, colIndex) => (
@@ -110,7 +110,7 @@ export default function CommonTable({
                   ))}
                 </TableRow>
               ))}
-            </TableBody> */}
+            </TableBody>
           
           
           </Table>

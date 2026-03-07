@@ -23,7 +23,7 @@ export default function UploadCard({
                  p-2 rounded-2xl border border-white/5 w-full"
     >
       {/* Header */}
-      <div className="flex gap- items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
         <div className="flex whitespace-nowrap items-center gap-2 text-white font-medium">
           <CloudUploadIcon className="text-blue-500" />
           {title}

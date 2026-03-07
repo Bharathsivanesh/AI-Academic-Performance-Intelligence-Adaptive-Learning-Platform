@@ -62,7 +62,7 @@ export default function DashboardHeader() {
 
         {/* Left Section */}
         <div>
-          <h1 className="text-2xl font-semibold text-white">
+          <h1 className="text-xl md:text-2xl font-semibold text-white">
             Staff Performance Overview Dashboard
           </h1>
           <p className="text-gray-400 text-sm mt-1">
@@ -74,7 +74,7 @@ export default function DashboardHeader() {
         <div className="flex flex-wrap items-center gap-4">
 
           {/* Passout Year */}
-          <div className="w-40">
+          <div className="md:w-40 ">
             <InputField
               type="select"
               name="passoutYear"
@@ -90,7 +90,7 @@ export default function DashboardHeader() {
           </div>
 
           {/* Semester */}
-          <div className="w-32">
+          <div className="md:w-32">
             <InputField
               type="select"
               name="semester"

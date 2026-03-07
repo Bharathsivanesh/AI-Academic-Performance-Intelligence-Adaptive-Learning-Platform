@@ -5,7 +5,7 @@ import ComparisonChart from './components/ComparisonChart'
 
 const PermTracking = () => {
   return (
-    <div className=" bg-[#0B1120]  overflow-y-hidden text-white  space-y-4">
+    <div className=" bg-[#0B1120]   text-white  space-y-4">
 
       {/* Previous Plans */}
       <PreviousPlans />

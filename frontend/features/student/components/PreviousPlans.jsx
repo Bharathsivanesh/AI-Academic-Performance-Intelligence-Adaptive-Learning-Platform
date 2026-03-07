@@ -35,7 +35,7 @@ const plans = [
 
 const PreviousPlans = () => {
   return (
-   <div className="w-full overflow-x-auto">
+   <div className="w-full overflow-x-auto min-w-0 p-2">
 
    
 

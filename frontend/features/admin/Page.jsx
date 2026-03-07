@@ -227,8 +227,8 @@ const staffFields = [
             />
           </div>
         </div>
-        <div className="flex justify-between items-center ">
-          <h2 className="text-xl w-2/3 font-semibold">
+        <div className="flex flex-col gap-3 md:gap-0 md:flex-row justify-between items-center ">
+          <h2 className="text-xl md:w-2/3 font-semibold">
             Existing Staff Directory
           </h2>
 

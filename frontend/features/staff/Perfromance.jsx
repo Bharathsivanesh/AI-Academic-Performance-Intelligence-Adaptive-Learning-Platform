@@ -70,7 +70,7 @@ const StudentPerfromance = () => {
       </div>
 
       {/* Total Enrollment */}
-      <div className="ml-auto">
+      <div className="md:ml-auto">
         <p className="text-xs text-gray-400">TOTAL ENROLLMENT</p>
         <h2 className="text-3xl font-bold text-white">142</h2>
         <span className="text-blue-500 text-sm">STUDENTS</span>
