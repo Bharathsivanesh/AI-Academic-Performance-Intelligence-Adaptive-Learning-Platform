@@ -8,7 +8,7 @@ export default function UploadCard({
   description = "Drop your file here",
   buttonText = "Browse Files",
   onFileSelect,
-  sampleFile = "/sample-staff.csv", // 👈 default sample file
+  sampleFile = "/sample-staff.csv",
 }) {
   const handleDownloadSample = () => {
     const link = document.createElement("a");
@@ -20,23 +20,26 @@ export default function UploadCard({
   return (
     <div
       className="bg-gradient-to-br from-[#111827] to-[#0f172a] 
-                 p-2 rounded-2xl border border-white/5 w-full"
+      p-4 md:p-6 rounded-2xl border border-white/5 w-full"
     >
       {/* Header */}
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
-        <div className="flex whitespace-nowrap items-center gap-2 text-white font-medium">
+      <div className="flex flex-col sm:flex-row  lg:flex-col sm:items-center sm:justify-between gap-3 mb-6">
+
+        {/* Title */}
+        <div className="flex items-center gap-2 text-white font-medium">
           <CloudUploadIcon className="text-blue-500" />
-          {title}
+          <span className="whitespace-nowrap">{title}</span>
         </div>
 
+        {/* Download Button */}
         <button
           onClick={handleDownloadSample}
-          className="flex cursor-pointer  items-center whitespace-nowrap gap-2 text-sm 
-                     bg-blue-600 hover:bg-blue-600/80 
-                     text-white px-3 py-1.5 
-                     rounded-lg transition"
+          className="flex items-center justify-center gap-2 text-sm
+          bg-blue-600 hover:bg-blue-600/80 
+          text-white px-3 py-2 rounded-lg transition
+          w-full sm:w-auto"
         >
-          <DownloadIcon fontSize="small"/>
+          <DownloadIcon fontSize="small" />
           Download Sample CSV
         </button>
       </div>
@@ -44,7 +47,7 @@ export default function UploadCard({
       {/* Upload Area */}
       <div
         className="border-2 border-dashed border-blue-500/30 
-                   rounded-xl p-8 text-center"
+        rounded-xl p-6 md:p-8 text-center"
       >
         <div className="flex justify-center mb-4">
           <div className="bg-blue-600/20 p-4 rounded-full">
@@ -52,14 +55,18 @@ export default function UploadCard({
           </div>
         </div>
 
-        <p className="text-white mb-1">{description}</p>
-        <p className="text-gray-400 text-sm mb-6">
+        <p className="text-white mb-1 text-sm md:text-base">
+          {description}
+        </p>
+
+        <p className="text-gray-400 text-xs md:text-sm mb-6">
           Supported formats: CSV, XLSX (Max 10MB)
         </p>
 
         <label
           className="cursor-pointer bg-blue-600 hover:bg-blue-700 
-                     px-6 py-2 rounded-lg text-white text-sm transition"
+          px-6 py-2 rounded-lg text-white text-sm transition
+          inline-block"
         >
           {buttonText}
           <input
