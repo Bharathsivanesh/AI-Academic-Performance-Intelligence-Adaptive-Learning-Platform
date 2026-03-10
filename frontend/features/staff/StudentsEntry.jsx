@@ -124,7 +124,7 @@ const StudentsEntry = () => {
   const staffFields = [
     {
       name: "staffName",
-      label: "Staff Name",
+      label: "Student Name",
       placeholder: "Enter full name",
       mandatory: true,
     },
@@ -144,6 +144,12 @@ const StudentsEntry = () => {
       name: "password",
       label: "Password",
       placeholder: "Enter password",
+      mandatory: true,
+    },
+      {
+      name: "registerNumber",
+      label: "Batch",
+      placeholder: "Select Batch",
       mandatory: true,
     },
   ];
@@ -171,7 +177,7 @@ const StudentsEntry = () => {
             <DynamicFormCard
               title="Manual Entry"
               fields={staffFields}
-              buttonText="Add Staff"
+              buttonText="Add Student"
               onSubmit={handleSubmit}
               formData={formData}
               handleChange={handleChange}
