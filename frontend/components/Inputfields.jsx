@@ -167,7 +167,32 @@ case "select":
     </TextField>
   );
     
-  
+  case "date":
+  const today = new Date().toISOString().split("T")[0];
+
+  return (
+    <TextField
+      fullWidth
+      required={mandatory}
+      type="date"
+      name={name}
+      value={value || ""}
+      onChange={onChange}
+      disabled={disabled}
+      variant="outlined"
+      size="medium"
+      inputProps={{
+        min: today, // ❗ prevents past dates
+      }}
+      sx={{
+        ...baseStyles,
+        "& input::-webkit-calendar-picker-indicator": {
+          filter: "invert(1)",
+          cursor: "pointer",
+        },
+      }}
+    />
+  );
   
   
   case "number":

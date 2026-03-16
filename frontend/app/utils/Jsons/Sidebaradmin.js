@@ -11,6 +11,12 @@ export const sidebarMenu = [
     path: "/admin",
     role:"admin"
   },
+  {
+  label: "Schedule Exam",
+  icon: QueryStatsIcon,
+  path: "/admin/schedule",
+  role: "admin",
+},
     {
     label: "Overview",
     icon: DashboardIcon,
