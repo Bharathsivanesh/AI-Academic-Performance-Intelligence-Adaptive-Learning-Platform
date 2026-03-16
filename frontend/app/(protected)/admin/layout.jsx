@@ -13,14 +13,14 @@ export default function AdminLayout({ children }) {
   };
 
   return (
-    <div className="flex h-full bg-[#0F172A]">
+    <div className="flex h-screen bg-[#0F172A] overflow-hidden">
 
-      {/* ✅ DESKTOP SIDEBAR */}
-      <div className="hidden md:block">
+      {/* DESKTOP SIDEBAR */}
+      <div className="hidden md:block h-screen sticky top-0">
         <Sidebar role="admin" />
       </div>
 
-      {/* ✅ MOBILE DRAWER */}
+      {/* MOBILE DRAWER */}
       <Drawer
         open={mobileOpen}
         onClose={handleDrawerToggle}
@@ -38,15 +38,19 @@ export default function AdminLayout({ children }) {
       </Drawer>
 
       {/* RIGHT SIDE */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col h-screen">
 
-        <Navbar
-          userName="Bharath"
-          role="ADMIN"
-          onMenuClick={handleDrawerToggle}
-        />
+        {/* NAVBAR */}
+        <div className="sticky top-0 z-50">
+          <Navbar
+            userName="Bharath"
+            role="ADMIN"
+            onMenuClick={handleDrawerToggle}
+          />
+        </div>
 
-        <main className="flex-1 overflow-auto ">
+        {/* SCROLLABLE CONTENT */}
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
 
