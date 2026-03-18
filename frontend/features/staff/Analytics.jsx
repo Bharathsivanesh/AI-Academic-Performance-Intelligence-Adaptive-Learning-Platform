@@ -7,6 +7,7 @@ import TopicMasteryChart from "./components.jsx/TopicMasteryChart";
 
 const StudentAnalytics = () => {
   const [filters, setFilters] = useState({
+    batch:"",
     examStage: "",
     subject: "",
     module: "",
@@ -23,6 +24,20 @@ const StudentAnalytics = () => {
         {/* Header Filters */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 items-end p-4 md:p-6 gap-6 border-b border-white/5">
 
+           <div className="w-full">
+            <p className="text-xs text-gray-400 mb-2">EXAM STAGE</p>
+            <InputField
+              type="select"
+              name="batch"
+              value={filters.batch}
+              onChange={handleChange}
+              placeholder="Select Batch"
+              options={[
+                { label: "2022-2026", value: "B2026" },
+                { label: "2023-2027", value: "B2027" },
+              ]}
+            />
+          </div>
           {/* Exam Stage */}
           <div className="w-full">
             <p className="text-xs text-gray-400 mb-2">EXAM STAGE</p>
