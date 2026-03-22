@@ -23,12 +23,7 @@ export const sidebarMenu = [
     path: "/staff",
     role:"staff"
   },
-     {
-  label: "Students",
-  icon: SchoolIcon,
-  path: "/staff/studententry",
-  role: "staff",
-},
+
 {
   label: "Analytics",
   icon: AnalyticsIcon,
@@ -41,10 +36,23 @@ export const sidebarMenu = [
   path: "/staff/performance",
   role: "staff",
 },
+     {
+  label: "Students",
+  icon: SchoolIcon,
+  path: "/staff/studententry",
+  role: "staff",
+},
 {
   label: "Performance",
   icon: TrendingUpIcon,
   path: "/student",
+  role: "student",
+},
+
+{
+  label: "Subject Insights",
+  icon: QueryStatsIcon,
+  path: "/student/tracking",
   role: "student",
 },
 {
@@ -53,10 +61,4 @@ export const sidebarMenu = [
   path: "/student/plan",
   role: "student",
 },
-{
-  label: "Performance Tracking",
-  icon: QueryStatsIcon,
-  path: "/student/tracking",
-  role: "student",
-}
 ];
