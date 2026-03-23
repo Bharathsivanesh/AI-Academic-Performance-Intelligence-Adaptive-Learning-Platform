@@ -8,7 +8,7 @@ export default function AuthWrapper({ children }) {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access_token");
 
     if (!token) {
       router.replace("/login"); // ❌ redirect if not logged in
