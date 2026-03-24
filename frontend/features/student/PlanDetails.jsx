@@ -1,33 +1,34 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import StudyPlanCard from "./components/StudyPlanCard";
 import CreateCustomPlan from "./components/CreateCustomPlan";
 import StudyPlanTimeline from "./components/PlanHistorySection";
-
-const plans = [
-  {
-    subject: "Machine Learning",
-    title: "Neural Networks: 7-Day Plan",
-    progress: 35,
-    status: "active",
-  },
-  {
-    subject: "Quantum Physics",
-    title: "Physics: IAT 1 Prep",
-    progress: 100,
-    status: "completed",
-  },
-  {
-    subject: "Calculus III",
-    title: "Math: Final Review",
-    progress: 60,
-    status: "active",
-  },
-];
+import { apiService } from "../../service/Apicall"; // adjust path
 
 const PlanDetails = () => {
+  const [plans, setPlans] = useState([]);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+
+  const fetchPlans = () => {
+    apiService({
+      endpoint: "/api/study-plans/",
+      method: "GET",
+      onSuccess: (res) => {
+        setPlans(res);
+        if (res.length > 0) {
+          setSelectedPlan(res[0]); // default first plan
+        }
+      },
+      onError: (err) => console.error(err),
+    });
+  };
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
   return (
     <div className="w-full p-4 md:p-8">
 
@@ -52,20 +53,36 @@ const PlanDetails = () => {
           flexWrap: { xs: "nowrap", md: "wrap" },
         }}
       >
-        {plans.map((plan, index) => (
-          <StudyPlanCard
-            key={index}
-            subject={plan.subject}
-            title={plan.title}
-            progress={plan.progress}
-            status={plan.status}
-          />
-        ))}
+{plans.map((plan) => {
+  const isActive = selectedPlan?.id === plan.id; // ✅ define here
+
+  return (
+    <div
+      key={plan.id}
+      onClick={() => setSelectedPlan(plan)}
+      className={`cursor-pointer rounded-xl transition-all duration-300
+        ${
+          isActive
+            ? "ring-4 ring-blue-500 shadow-lg shadow-blue-500/30"
+            : "hover:ring-1 hover:ring-white/20"
+        }
+      `}
+    >
+      <StudyPlanCard
+        subject={`Subject ${plan.subject}`}
+        title={plan.plan_name}
+        progress={plan.overall_progress}
+        status={plan.status}
+      />
+    </div>
+  );
+})}
       </Box>
 
-      <CreateCustomPlan />
+      <CreateCustomPlan refreshPlans={fetchPlans} />
 
-      <StudyPlanTimeline />
+      {selectedPlan && <StudyPlanTimeline plan={selectedPlan}  refreshPlans={fetchPlans} />}
+
     </div>
   );
 };
