@@ -1,64 +1,96 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
 import UploadCard from "../../components/UploadFile";
 import DynamicFormCard from "../../components/DynamicFormCard";
 import InputField from "../../components/Inputfields";
 import CommonTable from "../../components/Table";
 import SearchIcon from "@mui/icons-material/Search";
-import { Avatar, Chip, IconButton } from "@mui/material";
+import { Avatar, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-
+import { apiService } from "../../service/Apicall";
 
 const StudentsEntry = () => {
   const [searchText, setSearchText] = useState("");
+  const [students, setStudents] = useState([]);
 
-  const rows = [
-    {
-      name: "Alan Turing",
-      email: "aturing@uni.edu",
-      employeeId: "CS-2024-001",
-      department: "Computer Science",
-      role: "Senior Professor",
-      status: "Active",
-    },
-    {
-      name: "Ada King",
-      email: "ada.k@uni.edu",
-      employeeId: "CS-2024-002",
-      department: "Applied Mathematics",
-      role: "Head of Department",
-      status: "Active",
-    },
-    {
-      name: "Bharath",
-      email: "bharath@uni.edu",
-      employeeId: "CS-2024-003",
-      department: "Physics",
-      role: "Lecturer",
-      status: "Active",
-    },
-  ];
+  const [formData, setFormData] = useState({
+    student_name: "",
+    username: "",
+    email: "",
+    password: "",
+    department: "",
+    batch: "",
+  });
+
+  // ✅ GET API
+  const fetchStudents = () => {
+    apiService({
+      endpoint: "/api/admin/students/",
+      method: "GET",
+      onSuccess: (res) => setStudents(res),
+      onError: (err) => console.error(err),
+    });
+  };
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  // ✅ POST API
+  const handleSubmit = () => {
+    apiService({
+      endpoint: "/api/admin/student/create/",
+      method: "POST",
+      payload: formData,
+      onSuccess: () => {
+        fetchStudents(); // refresh
+      },
+      onError: (err) => console.error(err),
+    });
+  };
+
+  // ✅ DELETE API
+  const handleDelete = (id) => {
+    apiService({
+      endpoint: `/api/admin/students/${id}/delete/`,
+      method: "DELETE",
+      onSuccess: () => {
+        fetchStudents(); // refresh
+      },
+      onError: (err) => console.error(err),
+    });
+  };
+
+  const handleChange = (name, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // ✅ Table Data Mapping
+  const rows = students.map((s) => ({
+    id: s.id,
+    name: s.student_name,
+    email: s.email,
+    employeeId: s.username, // student id
+    department: `Dept ${s.department}`,
+    batch: `Batch ${s.batch}`,
+  }));
 
   const columns = [
     {
       label: "NAME",
       render: (row) => (
         <div className="flex items-center gap-3">
-          <Avatar
-            sx={{
-              width: 36,
-              height: 36,
-              backgroundColor: "#1e3a8a",
-              fontSize: 14,
-            }}
-          >
+          <Avatar sx={{ width: 36, height: 36, backgroundColor: "#1e3a8a" }}>
             {row.name
               .split(" ")
               .map((n) => n[0])
               .join("")}
           </Avatar>
-
           <div>
             <div className="font-medium text-white">{row.name}</div>
             <div className="text-xs text-gray-400">{row.email}</div>
@@ -68,38 +100,24 @@ const StudentsEntry = () => {
     },
     {
       field: "employeeId",
-      label: "EMPLOYEE ID",
+      label: "STUDENT ID",
     },
     {
       field: "department",
       label: "DEPARTMENT",
     },
     {
-      field: "role",
-      label: "ROLE",
-    },
-    {
-      label: "STATUS",
-      render: (row) => (
-        <Chip
-          label={row.status}
-          size="small"
-          sx={{
-            backgroundColor: "#1d4ed8",
-            color: "#fff",
-            fontWeight: 500,
-          }}
-        />
-      ),
+      field: "batch",
+      label: "BATCH",
     },
     {
       label: "ACTIONS",
-      render: () => (
+      render: (row) => (
         <div className="flex gap-1">
           <IconButton size="small">
             <EditIcon sx={{ color: "#3b82f6" }} />
           </IconButton>
-          <IconButton size="small">
+          <IconButton size="small" onClick={() => handleDelete(row.id)}>
             <DeleteIcon sx={{ color: "#ef4444" }} />
           </IconButton>
         </div>
@@ -107,37 +125,24 @@ const StudentsEntry = () => {
     },
   ];
 
-  const [formData, setFormData] = useState({
-    staffName: "",
-    registerNumber: "",
-    department: "",
-    role: "Staff",
-  });
-
-  const handleChange = (name, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
+  // ✅ Form Fields (UPDATED)
   const staffFields = [
     {
-      name: "staffName",
+      name: "student_name",
       label: "Student Name",
       placeholder: "Enter full name",
       mandatory: true,
     },
     {
-      name: "registerNumber",
-      label: "Register Number",
-      placeholder: "Enter unique register number",
+      name: "username",
+      label: "Student ID",
+      placeholder: "Enter register number",
       mandatory: true,
     },
     {
-      name: "department",
-      label: "Department",
-      placeholder: "Enter department name",
+      name: "email",
+      label: "Email",
+      placeholder: "Enter email",
       mandatory: true,
     },
     {
@@ -146,24 +151,26 @@ const StudentsEntry = () => {
       placeholder: "Enter password",
       mandatory: true,
     },
-      {
-      name: "registerNumber",
+    {
+      name: "department",
+      label: "Department",
+      placeholder: "Enter department id",
+      mandatory: true,
+    },
+    {
+      name: "batch",
       label: "Batch",
-      placeholder: "Select Batch",
+      placeholder: "Enter batch id",
       mandatory: true,
     },
   ];
-
-  const handleSubmit = () => {
-    console.log(formData);
-  };
 
   return (
     <div className="p-4 md:p-8 bg-[#0b1220] min-h-screen text-white overflow-x-hidden">
 
       <div className="flex flex-col gap-6">
 
-        {/* Upload + Manual Entry */}
+        {/* Upload + Form */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           <UploadCard
@@ -186,11 +193,11 @@ const StudentsEntry = () => {
 
         </div>
 
-        {/* Header + Search */}
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
 
           <h2 className="text-lg md:text-xl font-semibold">
-            Existing Staff Directory
+            Existing Student Directory
           </h2>
 
           <div className="w-full sm:w-[320px]">
@@ -199,21 +206,18 @@ const StudentsEntry = () => {
               startIcon={<SearchIcon sx={{ color: "#9ca3af" }} />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="w-full rounded-lg"
             />
           </div>
 
         </div>
 
         {/* Table */}
-        <div className="w-full">
-          <CommonTable
-            columns={columns}
-            rows={rows}
-            limit={2}
-            searchText={searchText}
-          />
-        </div>
+        <CommonTable
+          columns={columns}
+          rows={rows}
+          limit={5}
+          searchText={searchText}
+        />
 
       </div>
     </div>

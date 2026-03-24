@@ -3,14 +3,50 @@
 import React, { useState } from "react";
 import { MenuItem, TextField } from "@mui/material";
 import BoltIcon from "@mui/icons-material/Bolt";
+import { apiService } from "../../../service/Apicall";
 
-const CreateCustomPlan = () => {
+const CreateCustomPlan = ({ refreshPlans }) => {
   const [subject, setSubject] = useState("");
   const [duration, setDuration] = useState("");
   const [hours, setHours] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleCreatePlan = () => {
+    if (!subject || !duration || !hours) {
+      alert("Fill all fields");
+      return;
+    }
+
+    setLoading(true);
+
+    apiService({
+      endpoint: "/api/study-plan/create/",
+      method: "POST",
+      payload: {
+        subject: subject,
+        plan_name: `AI - ${duration} Plan`,
+        time_horizon_days: parseInt(duration),
+        daily_hours: parseInt(hours),
+        details: [
+          {
+            day_number: 1,
+            topic_name: "Intro Topic",
+          },
+        ],
+      },
+      onSuccess: (res) => {
+        setLoading(false);
+        refreshPlans(); // 🔥 refresh UI
+      },
+      onError: (err) => {
+        setLoading(false);
+        console.error(err);
+      },
+    });
+  };
 
   return (
-    <div className="w-full max-w-6xl mt-12  md:px-0">
+    <div className="w-full max-w-6xl mt-12 md:px-0">
 
       <div className="px-2 md:px-8">
 
@@ -40,9 +76,9 @@ const CreateCustomPlan = () => {
                 size="small"
                 sx={inputStyle}
               >
-                <MenuItem value="Neural Networks">Neural Networks</MenuItem>
-                <MenuItem value="Data Structures">Data Structures</MenuItem>
-                <MenuItem value="Operating Systems">Operating Systems</MenuItem>
+                <MenuItem value={1}>AI</MenuItem>
+                <MenuItem value={2}>DSA</MenuItem>
+                <MenuItem value={3}>OS</MenuItem>
               </TextField>
             </div>
 
@@ -60,9 +96,9 @@ const CreateCustomPlan = () => {
                 size="small"
                 sx={inputStyle}
               >
-                <MenuItem value="7 days">7 Days</MenuItem>
-                <MenuItem value="14 days">14 Days</MenuItem>
-                <MenuItem value="30 days">30 Days</MenuItem>
+                <MenuItem value="7">7 Days</MenuItem>
+                <MenuItem value="14">14 Days</MenuItem>
+                <MenuItem value="30">30 Days</MenuItem>
               </TextField>
             </div>
 
@@ -80,16 +116,19 @@ const CreateCustomPlan = () => {
                 size="small"
                 sx={inputStyle}
               >
-                <MenuItem value="2 hours">2 Hours</MenuItem>
-                <MenuItem value="4 hours">4 Hours</MenuItem>
-                <MenuItem value="6 hours">6 Hours</MenuItem>
+                <MenuItem value="2">2 Hours</MenuItem>
+                <MenuItem value="4">4 Hours</MenuItem>
+                <MenuItem value="6">6 Hours</MenuItem>
               </TextField>
             </div>
           </div>
 
-          <button className="mt-8 w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-all duration-300">
+          <button
+            onClick={handleCreatePlan}
+            className="mt-8 w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-all duration-300"
+          >
             <BoltIcon fontSize="small" />
-            Generate Study Schedule
+            {loading ? "Generating..." : "Generate Study Schedule"}
           </button>
 
         </div>
