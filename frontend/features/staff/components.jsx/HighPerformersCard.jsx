@@ -1,61 +1,42 @@
 "use client";
-import React, { useState } from "react";
 
-const mockHighPerformers = [
-  { name: "Aaron Smith", id: "2023CS001", score: 96 },
-  { name: "Clara Hughes", id: "2023CS042", score: 94 },
-  { name: "Daniel Craig", id: "2023CS015", score: 92 },
-   { name: "Aaron Smith", id: "2023CS001", score: 96 },
-  { name: "Clara Hughes", id: "2023CS042", score: 94 },
-  { name: "Daniel Craig", id: "2023CS015", score: 92 },
-];
-
-const HighPerformersCard = () => {
-  const [activeTab, setActiveTab] = useState("Top 10");
-
+const HighPerformersCard = ({ data = [] }) => {
   return (
-    <div className="bg-gradient-to-br from-[#0f1c2e] to-[#0b1624] rounded-2xl p-6 shadow-lg max-h-120  overflow-y-auto ">
-      
-      {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-white text-lg font-semibold">
-          ⭐ High Performers
-        </h2>
+    <div className="bg-[#0f1c2e] rounded-2xl p-6 max-h-[500px] overflow-y-auto">
 
-      
-      </div>
+      <h2 className="text-white text-lg font-semibold mb-4">
+        ⭐ High Performers
+      </h2>
+    <p className="text-xs text-gray-400 mb-6"> IAT-2 | Data Structures | Graph Algorithms </p>
+      {!data.length ? (
+        <p className="text-gray-400">No data</p>
+      ) : (
+        <div className="space-y-4">
+          {data.map((student, index) => (
+            <div key={index} className="flex justify-between border-b pb-3 border-white/5">
 
-      <p className="text-xs text-gray-400 mb-6">
-        IAT-2 | Data Structures | Graph Algorithms
-      </p>
+              <div className="flex gap-3 items-center">
+                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white">
+                  {student.name.charAt(0)}
+                </div>
 
-      {/* Student List */}
-      <div className="space-y-4">
-        {mockHighPerformers.map((student, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between border-b border-white/5 pb-3"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
-                {student.name.charAt(0)}
+                <div>
+                  <p className="text-white">{student.name}</p>
+                  <p className="text-xs text-gray-400">
+                    ID: {student.student_id}
+                  </p>
+                </div>
               </div>
-
-              <div>
-                <p className="text-white font-medium">{student.name}</p>
-                <p className="text-xs text-gray-400">{student.id}</p>
-              </div>
-            </div>
-
-            <div className="text-right">
-              <p className="text-green-400 text-lg font-bold">
-                {student.score}%
+       <div className="text-right">
+              <p className="text-green-400 font-bold">
+                {student.percentage}%
               </p>
               <p className="text-xs text-gray-400">PROFICIENCY</p>
             </div>
-          </div>
-        ))}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

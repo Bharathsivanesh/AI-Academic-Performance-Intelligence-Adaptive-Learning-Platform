@@ -10,47 +10,27 @@ import {
   Modal,
   Box,
 } from "@mui/material";
-export default function DashboardHeader() {
+export default function DashboardHeader({ onBatchChange }) {
   const [filters, setFilters] = useState({
     passoutYear: "",
-    semester: "",
-    academicYear: "",
   });
  const [open, setOpen] = useState(false);
   /* ---------------- Auto Academic Year Logic ---------------- */
 
-  useEffect(() => {
-    if (filters.passoutYear && filters.semester) {
-      const year = parseInt(filters.passoutYear);
 
-      // Example logic
-      // SEM 1-2 → 1st year
-      // SEM 3-4 → 2nd year
-      // SEM 5-6 → 3rd year
-      // SEM 7-8 → 4th year
-
-      const sem = parseInt(filters.semester);
-
-      let academicYear = "";
-
-      if (sem <= 2) academicYear = `${year - 4}-${year -3}`;
-      else if (sem <= 4) academicYear = `${year - 3}-${year -2}`;
-      else if (sem <= 6) academicYear = `${year - 2}-${year -1}`;
-      else academicYear = `${year-1 }-${year}`;
-
-      setFilters((prev) => ({
-        ...prev,
-        academicYear,
-      }));
-    }
-  }, [filters.passoutYear, filters.semester]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFilters((prev) => ({
       ...prev,
       [name]: value,
     }));
+
+    // 🔥 CALL API WHEN FILTER CHANGES
+    if (name === "passoutYear") {
+      onBatchChange(value); // 👈 PASS TO PARENT
+    }
   };
 
   return (
@@ -75,40 +55,21 @@ export default function DashboardHeader() {
 
           {/* Passout Year */}
           <div className="md:w-40 ">
-            <InputField
+           <InputField
               type="select"
               name="passoutYear"
               value={filters.passoutYear}
               onChange={handleChange}
               placeholder="Passout Year"
               options={[
-                { label: "2024", value: "2024" },
-                { label: "2025", value: "2025" },
-                { label: "2026", value: "2026" },
+                { label: "2024", value: "1" },
+                { label: "2025", value: "2" },
+                { label: "2026", value: "3" },
               ]}
             />
           </div>
 
-          {/* Semester */}
-          <div className="md:w-32">
-            <InputField
-              type="select"
-              name="semester"
-              value={filters.semester}
-              onChange={handleChange}
-              placeholder="Semester"
-              options={[
-                { label: "SEM 1", value: "1" },
-                { label: "SEM 2", value: "2" },
-                { label: "SEM 3", value: "3" },
-                { label: "SEM 4", value: "4" },
-                { label: "SEM 5", value: "5" },
-                { label: "SEM 6", value: "6" },
-                { label: "SEM 7", value: "7" },
-                { label: "SEM 8", value: "8" },
-              ]}
-            />
-          </div>
+
 
 
           {/* Upload Button */}

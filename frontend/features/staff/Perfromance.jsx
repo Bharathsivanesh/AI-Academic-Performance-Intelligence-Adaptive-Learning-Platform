@@ -1,26 +1,52 @@
 "use client";
-import React, { useState } from 'react'
-import InputField from '../../components/Inputfields'
-import HighPerformersCard from './components.jsx/HighPerformersCard';
-import UnderPerformersCard from './components.jsx/UnderPerformersCard';
 
-const StudentPerfromance = () => {
-      const [filters, setFilters] = useState({
-        examStage: "",
-        subject: "",
-        module: "",
-        batch:""
-      });
-    
-      const handleChange = (e) => {
-        setFilters({ ...filters, [e.target.name]: e.target.value });
-      };
+import React, { useEffect, useState } from "react";
+import InputField from "../../components/Inputfields";
+import HighPerformersCard from "./components.jsx/HighPerformersCard";
+import UnderPerformersCard from "./components.jsx/UnderPerformersCard";
+import { apiService } from "../../service/Apicall";
+
+const StudentPerformance = () => {
+  const [filters, setFilters] = useState({
+    batch: "",
+    examStage: "",
+    subject: "",
+    module: "",
+  });
+
+  const [data, setData] = useState(null);
+
+  const handleChange = (e) => {
+    const updated = { ...filters, [e.target.name]: e.target.value };
+    setFilters(updated);
+  };
+
+  // 🔥 API CALL
+  useEffect(() => {
+    if (!filters.batch) return; // ✅ batch mandatory
+
+    let query = `?batch=${filters.batch}`;
+
+    if (filters.subject) query += `&subject=${filters.subject}`;
+    if (filters.examStage) query += `&exam=${filters.examStage}`;
+    if (filters.module) query += `&topic=${filters.module}`;
+
+    apiService({
+      endpoint: `/api/staff-dashboard/${query}`,
+      method: "GET",
+      onSuccess: (res) => {
+        setData(res);
+      },
+      onError: (err) => console.error(err),
+    });
+  }, [filters]);
+
   return (
-     <div className="min-h-screen w-full bg-[#0b1220] p-6">
-  <div className="bg-[#0b1624] flex flex-col h-full rounded-2xl shadow-lg">
-    
-    {/* Header Row */}
-    <div className="flex flex-wrap items-end p-6 gap-6 border-b border-white/5">
+    <div className="min-h-screen w-full bg-[#0b1220] p-6">
+      <div className="bg-[#0b1624] flex flex-col h-full rounded-2xl shadow-lg">
+        {/* 🔥 FILTERS */}
+        <div className="flex flex-wrap items-end p-6 gap-6 border-b border-white/5">
+          {/* Batch */}
           <div className="w-64">
             <p className="text-xs text-gray-400 mb-2">BATCH</p>
             <InputField
@@ -30,78 +56,79 @@ const StudentPerfromance = () => {
               onChange={handleChange}
               placeholder="Select Batch"
               options={[
-                { label: "2022-2026", value: "B2026" },
-                { label: "2023-2027", value: "B2027" },
+                { label: "2024", value: "1" },
+                { label: "2025", value: "2" },
               ]}
             />
-            </div>
-      {/* Exam Stage */}
-      <div className="w-64">
-        <p className="text-xs text-gray-400 mb-2">EXAM STAGE</p>
-        <InputField
-          type="select"
-          name="examStage"
-          value={filters.examStage}
-          onChange={handleChange}
-          placeholder="Select Exam"
-          options={[
-            { label: "IAT-2 Mid-term", value: "iat2" },
-            { label: "IAT-1 Mid-term", value: "iat1" },
-          ]}
-        />
-      </div>
+          </div>
 
-      {/* Subject Discipline */}
-      <div className="w-72">
-        <p className="text-xs text-gray-400 mb-2">SUBJECT DISCIPLINE</p>
-        <InputField
-          type="select"
-          name="subject"
-          value={filters.subject}
-          onChange={handleChange}
-          placeholder="Select Subject"
-          options={[
-            { label: "Data Structures & Algorithms", value: "dsa" },
-            { label: "Operating Systems", value: "os" },
-          ]}
-        />
-      </div>
+          {/* Exam */}
+          <div className="w-64">
+            <p className="text-xs text-gray-400 mb-2">EXAM</p>
+            <InputField
+              type="select"
+              name="examStage"
+              value={filters.examStage}
+              onChange={handleChange}
+              placeholder="Select Exam"
+              options={[
+                { label: "IAT1", value: "IAT1" },
+                { label: "IAT2", value: "IAT2" },
+              ]}
+            />
+          </div>
 
-      {/* Module / Topic */}
-      <div className="w-72">
-        <p className="text-xs text-gray-400 mb-2">MODULE / TOPIC</p>
-        <InputField
-          type="select"
-          name="module"
-          value={filters.module}
-          onChange={handleChange}
-          placeholder="Select Module"
-          options={[
-            { label: "CO-3 Graph Traversal & Search", value: "co3" },
-            { label: "Sorting Algorithms", value: "sorting" },
-          ]}
-        />
-      </div>
+          {/* Subject */}
+          <div className="w-64">
+            <p className="text-xs text-gray-400 mb-2">SUBJECT</p>
+            <InputField
+              type="select"
+              name="subject"
+              value={filters.subject}
+              onChange={handleChange}
+              placeholder="Select Subject"
+              options={[
+                { label: "Computer Networks", value: "1" },
+                { label: "DBMS", value: "2" },
+              ]}
+            />
+          </div>
 
-      {/* Total Enrollment */}
-      <div className="md:ml-auto">
-        <p className="text-xs text-gray-400">TOTAL ENROLLMENT</p>
-        <h2 className="text-3xl font-bold text-white">142</h2>
-        <span className="text-blue-500 text-sm">STUDENTS</span>
+          {/* Topic */}
+          <div className="w-64">
+            <p className="text-xs text-gray-400 mb-2">TOPIC</p>
+            <InputField
+              type="select"
+              name="module"
+              value={filters.module}
+              onChange={handleChange}
+              placeholder="Select Topic"
+              options={[
+                { label: "OSI Model", value: "1" },
+                { label: "Routing", value: "2" },
+              ]}
+            />
+          </div>
+
+          {/* Total */}
+      
+
+          <div className="md:ml-auto">
+            {" "}
+            <p className="text-xs text-gray-400">TOTAL ENROLLMENT</p>{" "}
+            <h2 className="text-3xl font-bold text-white"> {data?.total_students || "--"}</h2>{" "}
+            <span className="text-blue-500 text-sm">STUDENTS</span>{" "}
+          </div>
+        </div>
+
+        {/* 🔥 CARDS */}
+        <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <HighPerformersCard data={data?.high_performers} />
+          <UnderPerformersCard data={data?.underperformers} />
+        </div>
       </div>
     </div>
+  );
+};
 
-    <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-  <HighPerformersCard />
-  <UnderPerformersCard />
-</div>
-
-  
-   
-
-  </div>
-</div>
-  )
-}
-
-export default StudentPerfromance
+export default StudentPerformance;
