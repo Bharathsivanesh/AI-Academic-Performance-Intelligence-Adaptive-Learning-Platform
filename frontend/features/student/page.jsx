@@ -31,7 +31,7 @@ const Studentpage = () => {
   const subjects = dashboardData?.subjects || [];
 
   return (
-    <div className="px-4 md:px-8 py-2">
+    <div className="px-4 md:px-8 py-2 h-screen">
       
       <AllOverview data={dashboardData} />
 

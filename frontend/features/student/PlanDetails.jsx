@@ -30,8 +30,7 @@ const PlanDetails = () => {
   }, []);
 
   return (
-    <div className="w-full p-4 md:p-8">
-
+    <div className="w-full p-4 md:p-8 h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-sm tracking-widest text-gray-400 uppercase">
@@ -53,36 +52,37 @@ const PlanDetails = () => {
           flexWrap: { xs: "nowrap", md: "wrap" },
         }}
       >
-{plans.map((plan) => {
-  const isActive = selectedPlan?.id === plan.id; // ✅ define here
+        {plans.map((plan) => {
+          const isActive = selectedPlan?.id === plan.id; // ✅ define here
 
-  return (
-    <div
-      key={plan.id}
-      onClick={() => setSelectedPlan(plan)}
-      className={`cursor-pointer rounded-xl transition-all duration-300
+          return (
+            <div
+              key={plan.id}
+              onClick={() => setSelectedPlan(plan)}
+              className={`cursor-pointer rounded-xl transition-all duration-300
         ${
           isActive
             ? "ring-4 ring-blue-500 shadow-lg shadow-blue-500/30"
             : "hover:ring-1 hover:ring-white/20"
         }
       `}
-    >
-      <StudyPlanCard
-        subject={`Subject ${plan.subject}`}
-        title={plan.plan_name}
-        progress={plan.overall_progress}
-        status={plan.status}
-      />
-    </div>
-  );
-})}
+            >
+              <StudyPlanCard
+                subject={`Subject ${plan.subject}`}
+                title={plan.plan_name}
+                progress={plan.overall_progress}
+                status={plan.status}
+              />
+            </div>
+          );
+        })}
       </Box>
 
       <CreateCustomPlan refreshPlans={fetchPlans} />
 
-      {selectedPlan && <StudyPlanTimeline plan={selectedPlan}  refreshPlans={fetchPlans} />}
-
+      {selectedPlan && (
+        <StudyPlanTimeline plan={selectedPlan} refreshPlans={fetchPlans} />
+      )}
     </div>
   );
 };

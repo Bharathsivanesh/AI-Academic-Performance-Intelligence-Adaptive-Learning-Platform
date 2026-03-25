@@ -23,6 +23,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 
 import { useRouter } from "next/navigation";
+import { apiService } from "../service/Apicall";
 
 export default function Navbar({
   userName = "Admin User",
@@ -33,9 +34,33 @@ export default function Navbar({
 
   const [openNotification, setOpenNotification] = useState(false);
 
-  const handleLogout = () => {
+ const handleLogout = async () => {
+  try {
+    const refreshToken = localStorage.getItem("refresh_token");
+
+    await apiService({
+      endpoint: "/api/logout/",
+      method:   "POST",
+      payload: {
+        refresh: refreshToken,
+      },
+      onSuccess: () => {
+        console.log("✅ Logout success");
+      },
+      onError: (err) => {
+        console.error("❌ Logout API error", err);
+      },
+    });
+  } catch (error) {
+    console.error("Logout failed:", error);
+  } finally {
+    // ✅ ALWAYS CLEAR TOKENS (even if API fails)
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+
     router.push("/login");
-  };
+  }
+};
 
   const handleOpenNotification = () => {
     setOpenNotification(true);
