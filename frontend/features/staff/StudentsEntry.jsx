@@ -40,10 +40,15 @@ const StudentsEntry = () => {
 
   // ✅ POST API
   const handleSubmit = () => {
+    const payload = {
+    ...formData,
+    department: Number(formData.department), // ✅ FIX
+    batch: Number(formData.batch),           // ✅ FIX
+  };
     apiService({
       endpoint: "/api/admin/student/create/",
       method: "POST",
-      payload: formData,
+      payload: payload,
       onSuccess: () => {
         fetchStudents(); // refresh
       },
