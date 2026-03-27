@@ -10,11 +10,14 @@ import { Avatar, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { apiService } from "../../service/Apicall";
+import TabModal from "../../components/Tabmodal";
+import EditStudentForm from "./components.jsx/EditStudentForm";
 
 const StudentsEntry = () => {
   const [searchText, setSearchText] = useState("");
   const [students, setStudents] = useState([]);
-
+  const [editOpen, setEditOpen] = useState(false);
+  const [editData, setEditData] = useState(null);
   const [formData, setFormData] = useState({
     student_name: "",
     username: "",
@@ -39,12 +42,24 @@ const StudentsEntry = () => {
   }, []);
 
   // ✅ POST API
+  const handleEdit = (row) => {
+    setEditData({
+      id: row.id,
+      student_name: row.name,
+      username: row.employeeId,
+      email: row.email,
+      department: row.department.replace("Dept ", ""), // 🔥 fix mapping
+      batch: row.batch.replace("Batch ", ""),
+    });
+
+    setEditOpen(true);
+  };
   const handleSubmit = () => {
     const payload = {
-    ...formData,
-    department: Number(formData.department), // ✅ FIX
-    batch: Number(formData.batch),           // ✅ FIX
-  };
+      ...formData,
+      department: Number(formData.department), // ✅ FIX
+      batch: Number(formData.batch), // ✅ FIX
+    };
     apiService({
       endpoint: "/api/admin/student/create/",
       method: "POST",
@@ -120,7 +135,10 @@ const StudentsEntry = () => {
       render: (row) => (
         <div className="flex gap-1">
           <IconButton size="small">
-            <EditIcon sx={{ color: "#3b82f6" }} />
+            <EditIcon
+              sx={{ color: "#3b82f6" }}
+              onClick={() => handleEdit(row)}
+            />
           </IconButton>
           <IconButton size="small" onClick={() => handleDelete(row.id)}>
             <DeleteIcon sx={{ color: "#ef4444" }} />
@@ -172,12 +190,9 @@ const StudentsEntry = () => {
 
   return (
     <div className="p-4 md:p-8 bg-[#0b1220] min-h-screen text-white overflow-x-hidden">
-
       <div className="flex flex-col gap-6">
-
         {/* Upload + Form */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
           <UploadCard
             title="Bulk Upload Students"
             description="Drop your CSV file here"
@@ -195,12 +210,10 @@ const StudentsEntry = () => {
               handleChange={handleChange}
             />
           </div>
-
         </div>
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-
           <h2 className="text-lg md:text-xl font-semibold">
             Existing Student Directory
           </h2>
@@ -213,7 +226,6 @@ const StudentsEntry = () => {
               onChange={(e) => setSearchText(e.target.value)}
             />
           </div>
-
         </div>
 
         {/* Table */}
@@ -223,8 +235,26 @@ const StudentsEntry = () => {
           limit={5}
           searchText={searchText}
         />
-
       </div>
+      <TabModal
+        open={editOpen}
+        handleClose={() => setEditOpen(false)}
+        tabs={[
+          {
+            label: "Basic Info",
+            content: (
+              <EditStudentForm
+                data={editData}
+                setData={setEditData}
+                onSuccess={() => {
+                  setEditOpen(false);
+                  fetchStudents(); 
+                }}
+              />
+            ),
+          },
+        ]}
+      />
     </div>
   );
 };

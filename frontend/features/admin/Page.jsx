@@ -15,23 +15,50 @@ import InputField from "../../components/Inputfields";
 import { useState, useEffect } from "react";
 import { Modal, Box, Button } from "@mui/material";
 import { apiService } from "../../service/Apicall";
+import TabModal from "../../components/Tabmodal";
+import EditStaffForm from "./components/EditStaffForm";
 
 export default function AdminPage() {
-
   const [AssignedBatch, setAssignedBatch] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
-
+  const [editOpen, setEditOpen] = useState(false);
+  const [editData, setEditData] = useState(null);
   const [filters, setFilters] = useState({
     passoutYear: "",
   });
-
+  const handleEdit = (row) => {
+    setEditData({
+       id: row.id,
+      staffName: row.name,
+      registerNumber: row.employeeId,
+      email: row.email,
+      department: row.department,
+      password: "",
+    });
+    setEditOpen(true);
+  };
   const handleOpen = (row) => {
     setSelectedStaff(row);
     setAssignedBatch(true);
   };
 
   const handleClose = () => setAssignedBatch(false);
-
+  const handleUpdate = () => {
+    apiService({
+      endpoint: `/api/admin/staff/${editData.id}/update/`,
+      method: "PUT",
+      payload: {
+        username: editData.registerNumber,
+        email: editData.email,
+        staff_name: editData.staffName,
+        department: editData.department,
+      },
+      onSuccess: () => {
+        fetchStaffList();
+        setEditOpen(false);
+      },
+    });
+  };
   const handlefilterChange = (e) => {
     setFilters({
       ...filters,
@@ -139,7 +166,10 @@ export default function AdminPage() {
       render: (row) => (
         <div className="flex gap-2">
           <IconButton size="small">
-            <EditIcon sx={{ color: "#3b82f6" }} />
+            <EditIcon
+              sx={{ color: "#3b82f6" }}
+              onClick={() => handleEdit(row)}
+            />
           </IconButton>
           <IconButton size="small" onClick={() => handleDelete(row.id)}>
             <DeleteIcon sx={{ color: "#ef4444" }} />
@@ -195,8 +225,16 @@ export default function AdminPage() {
       onSuccess: (res) => {
         setStatsData([
           { title: "Total Staff", value: res.total_staff, icon: GroupsIcon },
-          { title: "Total Students", value: res.total_students, icon: PersonIcon },
-          { title: "Total Subjects", value: res.total_subjects, icon: MenuBookIcon },
+          {
+            title: "Total Students",
+            value: res.total_students,
+            icon: PersonIcon,
+          },
+          {
+            title: "Total Subjects",
+            value: res.total_subjects,
+            icon: MenuBookIcon,
+          },
         ]);
       },
     });
@@ -217,9 +255,7 @@ export default function AdminPage() {
 
   return (
     <div className="p-8 bg-[#0b1220] min-h-screen text-white">
-
       <div className="flex flex-col gap-4">
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {statsData.map((card, index) => (
             <StatCard key={index} {...card} />
@@ -227,20 +263,24 @@ export default function AdminPage() {
         </div>
 
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold whitespace-nowrap">Existing Staff Directory</h2>
+          <h2 className="text-xl font-semibold whitespace-nowrap">
+            Existing Staff Directory
+          </h2>
           <div>
-
-          
-          <InputField
-            placeholder="Search by name, email ...`"
-            startIcon={<SearchIcon sx={{ color: "#9ca3af" }} />}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
+            <InputField
+              placeholder="Search by name, email ...`"
+              startIcon={<SearchIcon sx={{ color: "#9ca3af" }} />}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
           </div>
         </div>
 
-        <CommonTable columns={columns} rows={TableRow} searchText={searchText} />
+        <CommonTable
+          columns={columns}
+          rows={TableRow}
+          searchText={searchText}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <UploadCard title="Bulk Upload Staffs" />
@@ -260,16 +300,18 @@ export default function AdminPage() {
 
       {/* ================= MODAL ================= */}
       <Modal open={AssignedBatch} onClose={handleClose}>
-        <Box sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 400,
-          bgcolor: "#0f1c2e",
-          borderRadius: 3,
-          p: 4,
-        }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "#0f1c2e",
+            borderRadius: 3,
+            p: 4,
+          }}
+        >
           <h2 className="text-white text-lg mb-4">Assign Batch</h2>
 
           <InputField
@@ -302,7 +344,25 @@ export default function AdminPage() {
           </div>
         </Box>
       </Modal>
-
+    <TabModal
+  open={editOpen}
+  handleClose={() => setEditOpen(false)}
+  tabs={[
+    {
+      label: "Basic Info",
+      content: (
+        <EditStaffForm
+          data={editData}
+          setData={setEditData}
+          onSuccess={() => {
+            setEditOpen(false);
+            fetchStaffList(); // 🔥 refresh table
+          }}
+        />
+      ),
+    },
+  ]}
+/>
     </div>
   );
 }
