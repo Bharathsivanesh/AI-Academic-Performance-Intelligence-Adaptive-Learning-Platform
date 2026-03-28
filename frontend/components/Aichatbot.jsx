@@ -1,105 +1,156 @@
-import React from "react";
-import { Send, Mic, Paperclip } from "lucide-react";
+"use client";
 
-const ChatBubble = ({ message, isUser }) => (
-  <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-    <div
-      className={`max-w-lg px-4 py-3 rounded-2xl text-sm shadow-md ${
-        isUser
-          ? "bg-blue-600 text-white rounded-br-none"
-          : "bg-slate-800 text-gray-200 rounded-bl-none"
-      }`}
-    >
-      {message}
-    </div>
-  </div>
-);
+import { useState, useEffect, useRef } from "react";
 
-const ProgressBar = ({ label, value, color }) => (
-  <div className="mb-4">
-    <div className="flex justify-between text-xs mb-1 text-gray-300">
-      <span>{label}</span>
-      <span>{value}%</span>
-    </div>
-    <div className="w-full bg-slate-700 h-2 rounded-full">
-      <div
-        className={`h-2 rounded-full ${color}`}
-        style={{ width: `${value}%` }}
-      />
-    </div>
-  </div>
-);
+export default function Chatbot() {
+  const [messages, setMessages] = useState([
+    {
+      role: "ai",
+      text: "Hello! I'm your AI assistant. Ask me anything 👋",
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [typingIndex, setTypingIndex] = useState(0);
+  const [currentText, setCurrentText] = useState("");
+  const [loading, setLoading] = useState(false);
 
-export default function AiDashboard() {
+  const bottomRef = useRef(null);
+
+  const student_id = 2; // 👉 dynamic later if needed
+
+  // ✅ REAL API CALL
+  const getAIResponse = async (userMessage) => {
+    try {
+      setLoading(true);
+
+      const res = await fetch(
+        `http://127.0.0.1:8000/ask?question=${encodeURIComponent(
+          userMessage
+        )}&student_id=${student_id}`
+      );
+
+      const data = await res.json();
+
+      return data.answer || "No response from AI";
+    } catch (err) {
+      console.error(err);
+      return "⚠️ Error connecting to AI server";
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Typing animation
+  useEffect(() => {
+    if (typingIndex < currentText.length) {
+      const timeout = setTimeout(() => {
+        setTypingIndex((prev) => prev + 1);
+      }, 15);
+      return () => clearTimeout(timeout);
+    }
+  }, [typingIndex, currentText]);
+
+  // Send message
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    const userMessage = { role: "user", text: input };
+    setMessages((prev) => [...prev, userMessage]);
+
+    const question = input;
+    setInput("");
+
+    // Add empty AI message
+    setMessages((prev) => [...prev, { role: "ai", text: "" }]);
+
+    const aiText = await getAIResponse(question);
+
+    setCurrentText(aiText);
+    setTypingIndex(0);
+  };
+
+  // Update AI typing
+  useEffect(() => {
+    if (typingIndex > 0) {
+      setMessages((prev) => {
+        const updated = [...prev];
+        const lastIndex = updated.length - 1;
+
+        if (updated[lastIndex].role === "ai") {
+          updated[lastIndex].text = currentText.slice(0, typingIndex);
+        }
+
+        return updated;
+      });
+    }
+  }, [typingIndex]);
+
+  // Auto scroll
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, typingIndex]);
+
   return (
-    <div className=" bg-gradient-to-br from-[#020617] to-[#020617] text-white flex">
-      {/* LEFT CHAT SECTION */}
-      <div className="flex-1 p-6 flex flex-col justify-between">
-        <div className="space-y-4">
-          <ChatBubble message="Hello Alex! I've finished analyzing your recent Physics mock exam. You're showing great progress in Thermodynamics, but we need to focus on Wave Mechanics." />
+    <div className="flex flex-col h-full bg-[#0B1120] text-white">
 
-          <ChatBubble message='INSIGHT DETECTED: "Your score in Unit 3 is 15% lower than the class average."' />
-
-          <ChatBubble message="Why is my Physics score low? I thought I understood the formulas." isUser />
-
-          <ChatBubble message="It seems you have the formulas memorized, but you're struggling with vector decomposition required to apply them. 60% of your incorrect answers were due to direction calculation errors." />
-
-          <div className="flex gap-3 mt-4">
-            <button className="bg-slate-800 px-4 py-2 rounded-xl text-sm hover:bg-slate-700">
-              Practice Unit 3 Vectors
-            </button>
-            <button className="bg-slate-800 px-4 py-2 rounded-xl text-sm hover:bg-slate-700">
-              Watch Wave Mechanics Video
-            </button>
-          </div>
-        </div>
-
-        {/* INPUT BOX */}
-        <div className="mt-6 flex items-center bg-slate-800 rounded-xl px-3 py-2">
-          <Paperclip className="text-gray-400 w-5 h-5 mr-2" />
-          <input
-            type="text"
-            placeholder="Ask 'Am I ready for the semester exam?'..."
-            className="flex-1 bg-transparent outline-none text-sm text-gray-200"
-          />
-          <Mic className="text-gray-400 w-5 h-5 mx-2" />
-          <button className="bg-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-500">
-            Send <Send size={16} />
-          </button>
-        </div>
+      {/* Header */}
+      <div className="p-4 border-b border-gray-700 shrink-0 flex justify-between">
+        <h1 className="font-semibold">AI Assistant</h1>
+        <span className="text-green-400 text-sm">● Online</span>
       </div>
 
-      {/* RIGHT SIDEBAR */}
-      <div className="w-[320px] bg-[#020617] border-l border-slate-800 p-6 space-y-6">
-        {/* Academic Status */}
-        <div className="bg-slate-900 p-4 rounded-2xl shadow">
-          <h3 className="text-xs text-gray-400 mb-2">ACADEMIC STATUS</h3>
-          <div className="bg-orange-500/10 border border-orange-500 p-4 rounded-xl">
-            <p className="text-xs text-gray-300">Current Risk Level</p>
-            <h2 className="text-xl font-bold text-orange-400">MODERATE</h2>
-            <p className="text-xs text-gray-400 mt-1">
-              Physics Semester Exam is in 12 days. Current prep level: 64%
-            </p>
+      {/* Messages */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            className={`flex ${
+              msg.role === "user" ? "justify-end" : "justify-start"
+            }`}
+          >
+            <div
+              className={`max-w-md px-4 py-2 rounded-2xl ${
+                msg.role === "user"
+                  ? "bg-blue-600"
+                  : "bg-gray-800"
+              }`}
+            >
+              {msg.text}
+
+              {/* typing cursor */}
+              {i === messages.length - 1 &&
+                msg.role === "ai" &&
+                typingIndex < currentText.length && (
+                  <span className="animate-pulse">|</span>
+                )}
+            </div>
           </div>
-        </div>
+        ))}
 
-        {/* Topic Mastery */}
-        <div className="bg-slate-900 p-4 rounded-2xl shadow">
-          <h3 className="text-xs text-gray-400 mb-3">TOPIC MASTERY</h3>
+        {/* Loading */}
+        {loading && (
+          <div className="text-gray-400 text-sm">AI is thinking...</div>
+        )}
 
-          <p className="text-xs text-gray-400 mb-2">Strongest Topics</p>
-          <ProgressBar label="Calculus I" value={92} color="bg-blue-500" />
-          <ProgressBar label="Thermodynamics" value={88} color="bg-blue-500" />
+        <div ref={bottomRef} />
+      </div>
 
-          <p className="text-xs text-gray-400 mt-4 mb-2">Improvement Areas</p>
-          <ProgressBar label="Wave Mechanics" value={45} color="bg-red-500" />
-          <ProgressBar label="Electrostatics" value={51} color="bg-red-500" />
-        </div>
-
-        {/* Motivation Card */}
-        <div className="bg-slate-900 p-4 rounded-2xl text-center text-sm text-gray-300">
-          ⭐ You've studied 4 hours more than last week. Keep this momentum!
-        </div>
+      {/* Input */}
+      <div className="p-4 border-t border-gray-700 flex gap-2 shrink-0 bg-[#0B1120]">
+        <input
+          className="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-2 outline-none"
+          placeholder="Ask anything..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+        />
+        <button
+          onClick={handleSend}
+          className="bg-blue-600 px-4 py-2 rounded-xl hover:bg-blue-700"
+        >
+          Send
+        </button>
       </div>
     </div>
   );

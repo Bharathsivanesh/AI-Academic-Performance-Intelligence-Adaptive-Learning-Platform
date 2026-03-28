@@ -1,8 +1,7 @@
-"use client";
-
 import React, { useState } from "react";
 import { MenuItem, TextField } from "@mui/material";
 import BoltIcon from "@mui/icons-material/Bolt";
+
 import { apiService } from "../../../service/Apicall";
 
 const CreateCustomPlan = ({ refreshPlans }) => {
@@ -11,7 +10,7 @@ const CreateCustomPlan = ({ refreshPlans }) => {
   const [hours, setHours] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleCreatePlan = () => {
+  const handleCreatePlan = async () => {
     if (!subject || !duration || !hours) {
       alert("Fill all fields");
       return;
@@ -19,55 +18,86 @@ const CreateCustomPlan = ({ refreshPlans }) => {
 
     setLoading(true);
 
-    apiService({
-      endpoint: "/api/study-plan/create/",
-      method: "POST",
-      payload: {
-        subject: subject,
-        plan_name: `AI - ${duration} Plan`,
-        time_horizon_days: parseInt(duration),
-        daily_hours: parseInt(hours),
-        details: [
-          {
-            day_number: 1,
-            topic_name: "Intro Topic",
-          },
-        ],
-      },
-      onSuccess: (res) => {
-        setLoading(false);
-        refreshPlans(); // 🔥 refresh UI
-      },
-      onError: (err) => {
-        setLoading(false);
-        console.error(err);
-      },
-    });
+    try {
+      // 1️⃣ Call the first API to generate study plan JSON
+      const generatedPlanResponse = await apiService({
+        endpoint: "/api/study-plan/",
+        method: "POST",
+        payload: {
+          subject,
+          duration: parseInt(duration),
+          dailyHours: parseInt(hours),
+        },
+      });
+
+      console.log("Generated Plan JSON:", generatedPlanResponse);
+
+      let contentStr = generatedPlanResponse.choices[0].message.content;
+
+      // Step 2: Remove ```json wrapper if present
+      contentStr = contentStr.replace(/```json\s*/, "").replace(/```$/, "");
+
+      // Step 3: Parse JSON
+      const generatedPlan = JSON.parse(contentStr);
+
+      // Now you can safely map
+      const planData = {
+        subject: 1,
+        plan_name: generatedPlan.plan_name,
+        time_horizon_days: generatedPlan.time_horizon_days,
+        daily_hours: generatedPlan.daily_hours,
+        details: generatedPlan.details.map((d) => ({
+          day_number: d.day_number,
+          topic_name: d.topic_name,
+          video_links_pdf: d.video_links_pdf || d.video_links?.[0] || "",
+          reference_links_pdf:
+            d.reference_links_pdf || d.tutorial_links?.[0] || "",
+        })),
+      };
+
+      console.log(planData);
+      console.log("Prepared Plan Data for DB:", planData);
+
+      // 2️⃣ Call the second API to save plan to database
+      await apiService({
+        endpoint: "/api/study-plan/create/",
+        method: "POST",
+        payload: planData,
+        onSuccess: (res) => {
+          console.log("Plan saved successfully:", res);
+          setLoading(false);
+          refreshPlans();
+        },
+        onError: (err) => {
+          console.error("Error saving plan:", err);
+          setLoading(false);
+          alert("Failed to save plan. Try again!");
+        },
+      });
+    } catch (error) {
+      console.error("Error generating or saving plan:", error);
+      setLoading(false);
+      alert("Something went wrong. Try again!");
+    }
   };
 
   return (
     <div className="w-full max-w-6xl mt-12 md:px-0">
-
       <div className="px-2 md:px-8">
-
         <h2 className="text-xl font-semibold text-white">
           Create Your Custom Plan
         </h2>
-
         <p className="text-gray-400 text-sm mt-1">
           Input your requirements and let AI handle the scheduling.
         </p>
 
         <div className="mt-6 bg-gradient-to-br from-[#0f172a] to-[#111827] border border-white/10 rounded-2xl p-4 md:p-8 backdrop-blur-xl shadow-xl">
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
             {/* Subject */}
             <div>
               <p className="text-xs text-blue-400 mb-2 tracking-wider uppercase">
                 Select Subject
               </p>
-
               <TextField
                 select
                 fullWidth
@@ -76,9 +106,9 @@ const CreateCustomPlan = ({ refreshPlans }) => {
                 size="small"
                 sx={inputStyle}
               >
-                <MenuItem value={1}>AI</MenuItem>
-                <MenuItem value={2}>DSA</MenuItem>
-                <MenuItem value={3}>OS</MenuItem>
+                <MenuItem value="AI">AI</MenuItem>
+                <MenuItem value="DSA">DSA</MenuItem>
+                <MenuItem value="OS">OS</MenuItem>
               </TextField>
             </div>
 
@@ -87,7 +117,6 @@ const CreateCustomPlan = ({ refreshPlans }) => {
               <p className="text-xs text-blue-400 mb-2 tracking-wider uppercase">
                 Time Horizon
               </p>
-
               <TextField
                 select
                 fullWidth
@@ -107,7 +136,6 @@ const CreateCustomPlan = ({ refreshPlans }) => {
               <p className="text-xs text-blue-400 mb-2 tracking-wider uppercase">
                 Daily Commitment
               </p>
-
               <TextField
                 select
                 fullWidth
@@ -130,7 +158,6 @@ const CreateCustomPlan = ({ refreshPlans }) => {
             <BoltIcon fontSize="small" />
             {loading ? "Generating..." : "Generate Study Schedule"}
           </button>
-
         </div>
       </div>
     </div>
@@ -142,19 +169,11 @@ const inputStyle = {
     color: "#fff",
     backgroundColor: "#0f1c2e",
     borderRadius: "12px",
-    "& fieldset": {
-      borderColor: "rgba(255,255,255,0.1)",
-    },
-    "&:hover fieldset": {
-      borderColor: "#2563EB",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "#2563EB",
-    },
+    "& fieldset": { borderColor: "rgba(255,255,255,0.1)" },
+    "&:hover fieldset": { borderColor: "#2563EB" },
+    "&.Mui-focused fieldset": { borderColor: "#2563EB" },
   },
-  "& .MuiSvgIcon-root": {
-    color: "#fff",
-  },
+  "& .MuiSvgIcon-root": { color: "#fff" },
 };
 
 export default CreateCustomPlan;

@@ -1,27 +1,27 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Bell, CheckCircle } from "lucide-react";
+import { Bell, CheckCircle, ExternalLink } from "lucide-react";
 import { apiService } from "../../../service/Apicall"; // adjust path
 
-const StudyPlanTimeline = ({ plan,refreshPlans }) => {
+const StudyPlanTimeline = ({ plan, refreshPlans }) => {
   const [localPlan, setLocalPlan] = useState(plan);
 
-  // ✅ FIX: sync when user selects different plan
+  // ✅ Sync when plan changes
   useEffect(() => {
     setLocalPlan(plan);
   }, [plan]);
 
   if (!localPlan) return null;
 
-  // ✅ Calculate progress
+  // ✅ Calculate overall progress
   const calculateProgress = (details) => {
     if (!details || details.length === 0) return 0;
     const completed = details.filter((d) => d.is_completed).length;
     return Math.round((completed / details.length) * 100);
   };
 
-  // ✅ Mark day complete API
+  // ✅ Mark day as complete
   const markAsComplete = (id) => {
     apiService({
       endpoint: `/api/plan/day-complete/${id}/`,
@@ -38,10 +38,15 @@ const StudyPlanTimeline = ({ plan,refreshPlans }) => {
           details: updatedDetails,
           overall_progress: newProgress,
         });
-        refreshPlans()
+        refreshPlans();
       },
       onError: (err) => console.error(err),
     });
+  };
+
+  // ✅ Open link in new tab safely
+  const openLink = (url) => {
+    if (url) window.open(url, "_blank");
   };
 
   return (
@@ -49,36 +54,27 @@ const StudyPlanTimeline = ({ plan,refreshPlans }) => {
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6 mb-12">
-
         <div>
-          <h2 className="text-xl font-semibold">
-            {localPlan.plan_name}
-          </h2>
-
+          <h2 className="text-xl font-semibold">{localPlan.plan_name}</h2>
           <p className="text-gray-400 text-sm">
             Daily {localPlan.daily_hours} Hours • {localPlan.time_horizon_days} Days
           </p>
         </div>
 
         <div className="w-full md:w-1/2 bg-[#0f172a] rounded-xl p-4 flex flex-col gap-3">
-
           <span className="text-blue-400 tracking-widest text-sm font-semibold">
             PLAN PROGRESS
           </span>
-
           <div className="flex items-center gap-4">
-
             <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
               <div
                 className="bg-blue-500 h-full rounded-full"
                 style={{ width: `${localPlan.overall_progress}%` }}
               />
             </div>
-
             <span className="text-white font-semibold text-lg">
               {localPlan.overall_progress}%
             </span>
-
           </div>
         </div>
       </div>
@@ -90,41 +86,33 @@ const StudyPlanTimeline = ({ plan,refreshPlans }) => {
         <div className="absolute left-4 md:left-1/2 md:-translate-x-1/2 top-0 h-full w-[3px] bg-white/10" />
 
         {localPlan.details.map((item, index) => {
-
           const isLeft = index % 2 === 0;
 
           return (
             <div
               key={item.id}
               className={`relative flex mb-10
-              ${isLeft ? "md:justify-start" : "md:justify-end"}
-              justify-start`}
+                ${isLeft ? "md:justify-start" : "md:justify-end"} justify-start`}
             >
 
               {/* Dot */}
               <div
                 className={`absolute left-4 md:left-1/2 md:-translate-x-1/2 w-4 h-4 rounded-full
-                ${item.is_completed ? "bg-green-500" : "bg-blue-500"}
-              `}
+                  ${item.is_completed ? "bg-green-500" : "bg-blue-500"}`}
               />
 
               {/* Card */}
               <div
-                className={`ml-12 md:ml-0 md:w-1/2 relative z-10 ${
-                  isLeft ? "md:pr-10" : "md:pl-10"
-                }`}
+                className={`ml-12 md:ml-0 md:w-1/2 relative z-10 ${isLeft ? "md:pr-10" : "md:pl-10"}`}
               >
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md">
 
                   <div className="flex justify-between items-center mb-2">
-
                     <span className="text-xs text-blue-400 tracking-wider">
                       DAY {item.day_number}
                     </span>
 
                     <div className="flex items-center gap-2">
-
-                      {/* ✅ Click to complete */}
                       {!item.is_completed && (
                         <CheckCircle
                           size={18}
@@ -132,20 +120,36 @@ const StudyPlanTimeline = ({ plan,refreshPlans }) => {
                           onClick={() => markAsComplete(item.id)}
                         />
                       )}
-
                       <Bell size={16} className="text-gray-400" />
                     </div>
                   </div>
 
-                  <h3 className="text-lg font-semibold mb-2">
-                    {item.topic_name}
-                  </h3>
+                  <h3 className="text-lg font-semibold mb-2">{item.topic_name}</h3>
+
+                  {/* ✅ Buttons for resources */}
+                  <div className="flex gap-4 mt-2">
+                    {item.video_links_pdf && (
+                      <button
+                        className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded flex items-center gap-2 text-sm font-medium"
+                        onClick={() => openLink(item.video_links_pdf)}
+                      >
+                        Video <ExternalLink size={14} />
+                      </button>
+                    )}
+
+                    {item.reference_links_pdf && (
+                      <button
+                        className="bg-green-500 hover:bg-green-600 px-3 py-1 rounded flex items-center gap-2 text-sm font-medium"
+                        onClick={() => openLink(item.reference_links_pdf)}
+                      >
+                        Reference <ExternalLink size={14} />
+                      </button>
+                    )}
+                  </div>
 
                   {/* ✅ Completed label */}
                   {item.is_completed && (
-                    <span className="text-green-400 text-xs">
-                      ✅ Completed
-                    </span>
+                    <span className="text-green-400 text-xs mt-2 block">✅ Completed</span>
                   )}
 
                 </div>
@@ -154,17 +158,15 @@ const StudyPlanTimeline = ({ plan,refreshPlans }) => {
               {/* Step number */}
               <span
                 className={`hidden md:block absolute text-6xl font-bold text-white/5
-                ${isLeft ? "right-[55%]" : "left-[55%]"}
-                top-1/2 -translate-y-1/2`}
+                  ${isLeft ? "right-[55%]" : "left-[55%]"}
+                  top-1/2 -translate-y-1/2`}
               >
                 {String(index + 1).padStart(2, "0")}
               </span>
-
             </div>
           );
         })}
       </div>
-
     </div>
   );
 };
