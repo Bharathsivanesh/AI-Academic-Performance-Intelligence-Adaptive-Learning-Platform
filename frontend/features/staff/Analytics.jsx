@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import InputField from "../../components/Inputfields";
 import ClassProficiencyChart from "./components.jsx/ClassSubjectPerformanceChart";
-import { apiService } from "../../service/Apicall";
 import TopicMasteryChart from "./components.jsx/TopicMasteryChart";
+import { apiService } from "../../service/Apicall";
+
 const StudentAnalytics = () => {
   const [filters, setFilters] = useState({
     batch: "",
@@ -13,12 +14,48 @@ const StudentAnalytics = () => {
 
   const [data, setData] = useState(null);
 
+  const [batchOptions, setBatchOptions] = useState([]);     // ✅ NEW
+  const [subjectOptions, setSubjectOptions] = useState([]); // ✅ NEW
+
+  // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
     const updated = { ...filters, [e.target.name]: e.target.value };
     setFilters(updated);
   };
 
-  // 🔥 API CALL WHEN BOTH VALUES PRESENT
+  // ================= FETCH BATCHES =================
+  useEffect(() => {
+    apiService({
+      endpoint: "/api/staff/batches/", // ✅ staff batches
+      method: "GET",
+      onSuccess: (res) => {
+        const formatted = res.map((b) => ({
+          label: b.batch_name,
+          value: b.id,
+        }));
+        setBatchOptions(formatted);
+      },
+      onError: (err) => console.error(err),
+    });
+  }, []);
+
+  // ================= FETCH SUBJECTS =================
+  useEffect(() => {
+    apiService({
+      endpoint: "/api/subjects/?user=true", // ✅ logged-in user subjects
+      method: "GET",
+      onSuccess: (res) => {
+        const formatted = res.map((s) => ({
+          label: s.subject_name,
+          value: s.id,
+        }));
+        setSubjectOptions(formatted);
+      },
+      onError: (err) => console.error(err),
+    });
+  }, []);
+
+  // ================= ANALYTICS API =================
   useEffect(() => {
     if (filters.batch && filters.subject) {
       apiService({
@@ -35,9 +72,11 @@ const StudentAnalytics = () => {
   return (
     <div className="w-full h-screen p-4 md:p-6">
       <div className="flex flex-col min-h-full rounded-2xl shadow-lg bg-[#0B1120]">
+
         {/* 🔥 FILTERS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 items-end p-4 md:p-6 gap-6 border-b border-white/5">
-          {/* Batch */}
+
+          {/* ✅ BATCH DROPDOWN */}
           <div>
             <p className="text-xs text-gray-400 mb-2">BATCH</p>
             <InputField
@@ -46,14 +85,11 @@ const StudentAnalytics = () => {
               value={filters.batch}
               onChange={handleChange}
               placeholder="Select Batch"
-              options={[
-                { label: "2024", value: "1" },
-                { label: "2025", value: "2" },
-              ]}
+              options={batchOptions}
             />
           </div>
 
-          {/* Subject */}
+          {/* ✅ SUBJECT DROPDOWN */}
           <div>
             <p className="text-xs text-gray-400 mb-2">SUBJECT</p>
             <InputField
@@ -62,14 +98,11 @@ const StudentAnalytics = () => {
               value={filters.subject}
               onChange={handleChange}
               placeholder="Select Subject"
-              options={[
-                { label: "Computer Networks", value: "2" },
-                { label: "DBMS", value: "3" },
-              ]}
+              options={subjectOptions}
             />
           </div>
 
-          {/* Students */}
+          {/* TOTAL STUDENTS */}
           <div>
             <p className="text-xs text-gray-400">TOTAL ENROLLMENT</p>
             <h2 className="text-3xl font-bold text-white">
@@ -77,27 +110,20 @@ const StudentAnalytics = () => {
             </h2>
             <span className="text-blue-500 text-sm">STUDENTS</span>
           </div>
+
         </div>
 
-        {/* 🔥 CHART */}
-        {/* <div className="p-4 md:p-6">
-          <ClassProficiencyChart data={data} />
-        </div>
-        
-         <div className="w-full">
-            <TopicMasteryChart />
-          </div> */}
-
+        {/* 🔥 CHARTS */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-2 md:p-6 flex-1">
-          {" "}
+
           <div className="w-full">
-            {" "}
-            <ClassProficiencyChart  data={data} />{" "}
-          </div>{" "}
+            <ClassProficiencyChart data={data} />
+          </div>
+
           <div className="w-full">
-            {" "}
-            <TopicMasteryChart />{" "}
-          </div>{" "}
+            <TopicMasteryChart data={data} />
+          </div>
+
         </div>
       </div>
     </div>

@@ -32,6 +32,7 @@ export default function DynamicFormCard({
     mandatory={field.mandatory}
     value={formData[field.name]}
     disabled={field.disabled}
+      options={field.options} 
     onChange={(e) =>
       handleChange(field.name, e.target.value)
     }
