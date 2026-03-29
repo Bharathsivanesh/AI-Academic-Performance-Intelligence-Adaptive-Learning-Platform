@@ -1,13 +1,31 @@
 "use client";
 
-
 import { Button } from "@mui/material";
 import { apiService } from "../../../service/Apicall";
 import InputField from "../../../components/Inputfields";
-
+import { useEffect, useState } from "react";
 
 export default function EditStudentForm({ data, setData, onSuccess }) {
 
+  const [batches, setBatches] = useState([]);
+
+  // ✅ Fetch staff batches
+  useEffect(() => {
+    apiService({
+      endpoint: "/api/staff/batches/",
+      method: "GET",
+      onSuccess: (res) => {
+        const formatted = res.map((b) => ({
+          label: b.batch_name,
+          value: b.id,
+        }));
+        setBatches(formatted);
+      },
+      onError: (err) => console.error(err),
+    });
+  }, []);
+
+  // ✅ Update API
   const handleUpdate = () => {
     if (!data?.id) return;
 
@@ -18,8 +36,7 @@ export default function EditStudentForm({ data, setData, onSuccess }) {
         student_name: data.student_name,
         username: data.username,
         email: data.email,
-        department: Number(data.department),
-        batch: Number(data.batch),
+        batch: Number(data.batch), // ✅ ONLY batch
       },
       onSuccess: () => {
         onSuccess && onSuccess();
@@ -37,6 +54,7 @@ export default function EditStudentForm({ data, setData, onSuccess }) {
 
       <div className="grid grid-cols-1 gap-4">
 
+        {/* Student Name */}
         <InputField
           label="Student Name"
           value={data?.student_name || ""}
@@ -45,6 +63,7 @@ export default function EditStudentForm({ data, setData, onSuccess }) {
           }
         />
 
+        {/* Student ID */}
         <InputField
           label="Student ID"
           value={data?.username || ""}
@@ -53,6 +72,7 @@ export default function EditStudentForm({ data, setData, onSuccess }) {
           }
         />
 
+        {/* Email */}
         <InputField
           label="Email"
           value={data?.email || ""}
@@ -61,25 +81,20 @@ export default function EditStudentForm({ data, setData, onSuccess }) {
           }
         />
 
+        {/* ✅ Batch Dropdown */}
         <InputField
-          label="Department"
-          value={data?.department || ""}
-          onChange={(e) =>
-            setData((prev) => ({ ...prev, department: e.target.value }))
-          }
-        />
-
-        <InputField
+          type="select"
           label="Batch"
           value={data?.batch || ""}
           onChange={(e) =>
             setData((prev) => ({ ...prev, batch: e.target.value }))
           }
+          options={batches}
         />
 
       </div>
 
-      {/* SAVE BUTTON */}
+      {/* Save Button */}
       <div className="flex justify-end mt-4">
         <Button
           sx={{

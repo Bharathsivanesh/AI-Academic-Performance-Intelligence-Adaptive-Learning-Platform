@@ -1,24 +1,38 @@
 "use client";
 
-
-
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import { useEffect, useState } from "react";
 import InputField from "../../../components/Inputfields";
-import {
-  Modal,
-  Box,
-} from "@mui/material";
+import { Modal, Box } from "@mui/material";
+import { apiService } from "../../../service/Apicall"; // ✅ ADD
+
 export default function DashboardHeader({ onBatchChange }) {
   const [filters, setFilters] = useState({
     passoutYear: "",
+    semester: "",
   });
- const [open, setOpen] = useState(false);
-  /* ---------------- Auto Academic Year Logic ---------------- */
 
+  const [open, setOpen] = useState(false);
 
+  const [batchOptions, setBatchOptions] = useState([]); // ✅ NEW
 
+  /* ---------------- FETCH STAFF BATCHES ---------------- */
+  useEffect(() => {
+    apiService({
+      endpoint: "/api/staff/batches/", // ✅ YOUR API
+      method: "GET",
+      onSuccess: (res) => {
+        const formatted = res.map((b) => ({
+          label: b.batch_name,
+          value: b.id,
+        }));
+        setBatchOptions(formatted);
+      },
+      onError: (err) => console.error(err),
+    });
+  }, []);
+
+  /* ---------------- HANDLE CHANGE ---------------- */
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -27,9 +41,9 @@ export default function DashboardHeader({ onBatchChange }) {
       [name]: value,
     }));
 
-    // 🔥 CALL API WHEN FILTER CHANGES
+    // 🔥 PASS TO PARENT
     if (name === "passoutYear") {
-      onBatchChange(value); // 👈 PASS TO PARENT
+      onBatchChange(value);
     }
   };
 
@@ -46,50 +60,40 @@ export default function DashboardHeader({ onBatchChange }) {
             Staff Performance Overview Dashboard
           </h1>
           <p className="text-gray-400 text-sm mt-1">
-            Academic Year {filters.academicYear || "----"} • Computer Science
+            Academic Year {filters.passoutYear || "----"} • Computer Science
           </p>
         </div>
 
         {/* Right Controls */}
         <div className="flex flex-wrap items-center gap-4">
 
-          {/* Passout Year */}
+          {/* ✅ DYNAMIC BATCH DROPDOWN */}
           <div className="md:w-40 ">
-           <InputField
+            <InputField
               type="select"
               name="passoutYear"
               value={filters.passoutYear}
               onChange={handleChange}
               placeholder="Passout Year"
-              options={[
-                { label: "2024", value: "1" },
-                { label: "2025", value: "2" },
-                { label: "2026", value: "3" },
-              ]}
+              options={batchOptions} // 🔥 UPDATED
             />
           </div>
-
-
-
 
           {/* Upload Button */}
           <button
             className="flex items-center gap-2 px-6 py-2 
                        bg-blue-600 hover:bg-blue-700 
                        rounded-xl text-white transition shadow-lg"
-            onClick={()=>setOpen(true)}
+            onClick={() => setOpen(true)}
           >
             <CloudUploadIcon fontSize="small" />
             Upload Academic Marks
-          </button> 
-
+          </button>
         </div>
       </div>
-      <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-        aria-labelledby="upload-modal"
-      >
+
+      {/* ================= MODAL ================= */}
+      <Modal open={open} onClose={() => setOpen(false)}>
         <Box
           className="absolute top-1/2 left-1/2
                      -translate-x-1/2 -translate-y-1/2
@@ -103,20 +107,14 @@ export default function DashboardHeader({ onBatchChange }) {
 
           <div className="space-y-5">
 
-            {/* Passout Year */}
+            {/* ✅ SAME BATCH DROPDOWN */}
             <InputField
               type="select"
               name="passoutYear"
-           
               value={filters.passoutYear}
               onChange={handleChange}
-             
-              placeholder="Select Passout Year"
-              options={[
-                { label: "2024", value: "2024" },
-                { label: "2025", value: "2025" },
-                { label: "2026", value: "2026" },
-              ]}
+              placeholder="Select Batch"
+              options={batchOptions} // 🔥 UPDATED
             />
 
             {/* Semester */}
@@ -126,7 +124,6 @@ export default function DashboardHeader({ onBatchChange }) {
               value={filters.semester}
               onChange={handleChange}
               placeholder="Select Semester"
-           
               options={[
                 { label: "SEM 1", value: "1" },
                 { label: "SEM 2", value: "2" },

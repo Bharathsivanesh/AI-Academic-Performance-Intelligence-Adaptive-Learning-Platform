@@ -5,7 +5,7 @@ import { Button } from "@mui/material";
 import { apiService } from "../../../service/Apicall";
 
 
-export default function EditStaffForm({ data, setData, onSuccess }) {
+export default function EditStaffForm({ data, setData, onSuccess ,departments}) {
 
   const handleUpdate = () => {
     if (!data?.id) {
@@ -65,13 +65,20 @@ export default function EditStaffForm({ data, setData, onSuccess }) {
           }
         />
 
-        <InputField
-          label="Department"
-          value={data?.department || ""}
-          onChange={(e) =>
-            setData((prev) => ({ ...prev, department: e.target.value }))
-          }
-        />
+       <InputField
+  label="Department"
+  type="select"                         // 🔥 IMPORTANT
+  name="department"
+  value={data?.department || ""}
+  options={departments}                 // 🔥 dynamic options
+  placeholder="Select Department"
+  onChange={(e) =>
+    setData((prev) => ({
+      ...prev,
+      department: e.target.value,       // 👈 will store ID
+    }))
+  }
+/>
       </div>
 
       {/* ✅ SAVE BUTTON */}

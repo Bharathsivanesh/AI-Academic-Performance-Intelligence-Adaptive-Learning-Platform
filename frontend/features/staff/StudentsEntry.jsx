@@ -16,18 +16,19 @@ import EditStudentForm from "./components.jsx/EditStudentForm";
 const StudentsEntry = () => {
   const [searchText, setSearchText] = useState("");
   const [students, setStudents] = useState([]);
+  const [batches, setBatches] = useState([]); // 🔥 NEW
   const [editOpen, setEditOpen] = useState(false);
   const [editData, setEditData] = useState(null);
+
   const [formData, setFormData] = useState({
     student_name: "",
     username: "",
     email: "",
     password: "",
-    department: "",
     batch: "",
   });
 
-  // ✅ GET API
+  // ================= GET STUDENTS =================
   const fetchStudents = () => {
     apiService({
       endpoint: "/api/admin/students/",
@@ -37,48 +38,71 @@ const StudentsEntry = () => {
     });
   };
 
+  // ================= GET STAFF BATCHES =================
+  const fetchBatches = () => {
+    apiService({
+      endpoint: "/api/staff/batches/", // 🔥 YOUR API
+      method: "GET",
+      onSuccess: (res) => {
+        const formatted = res.map((b) => ({
+          label: b.batch_name,
+          value: b.id,
+        }));
+        setBatches(formatted);
+      },
+      onError: (err) => console.error(err),
+    });
+  };
+
   useEffect(() => {
     fetchStudents();
+    fetchBatches(); // 🔥 CALL HERE
   }, []);
 
-  // ✅ POST API
+  // ================= EDIT =================
   const handleEdit = (row) => {
     setEditData({
       id: row.id,
       student_name: row.name,
       username: row.employeeId,
       email: row.email,
-      department: row.department.replace("Dept ", ""), // 🔥 fix mapping
-      batch: row.batch.replace("Batch ", ""),
+      batch: Number(row.batch.replace("Batch ", "")),
     });
 
     setEditOpen(true);
   };
+
+  // ================= CREATE =================
   const handleSubmit = () => {
     const payload = {
       ...formData,
-      department: Number(formData.department), // ✅ FIX
-      batch: Number(formData.batch), // ✅ FIX
+      batch: Number(formData.batch), // ✅ only batch
     };
+
     apiService({
       endpoint: "/api/admin/student/create/",
       method: "POST",
       payload: payload,
       onSuccess: () => {
-        fetchStudents(); // refresh
+        fetchStudents();
+        setFormData({
+          student_name: "",
+          username: "",
+          email: "",
+          password: "",
+          batch: "",
+        });
       },
       onError: (err) => console.error(err),
     });
   };
 
-  // ✅ DELETE API
+  // ================= DELETE =================
   const handleDelete = (id) => {
     apiService({
       endpoint: `/api/admin/students/${id}/delete/`,
       method: "DELETE",
-      onSuccess: () => {
-        fetchStudents(); // refresh
-      },
+      onSuccess: () => fetchStudents(),
       onError: (err) => console.error(err),
     });
   };
@@ -90,12 +114,12 @@ const StudentsEntry = () => {
     }));
   };
 
-  // ✅ Table Data Mapping
+  // ================= TABLE =================
   const rows = students.map((s) => ({
     id: s.id,
     name: s.student_name,
     email: s.email,
-    employeeId: s.username, // student id
+    employeeId: s.username,
     department: `Dept ${s.department}`,
     batch: `Batch ${s.batch}`,
   }));
@@ -148,7 +172,7 @@ const StudentsEntry = () => {
     },
   ];
 
-  // ✅ Form Fields (UPDATED)
+  // ================= FORM FIELDS =================
   const staffFields = [
     {
       name: "student_name",
@@ -175,15 +199,10 @@ const StudentsEntry = () => {
       mandatory: true,
     },
     {
-      name: "department",
-      label: "Department",
-      placeholder: "Enter department id",
-      mandatory: true,
-    },
-    {
       name: "batch",
       label: "Batch",
-      placeholder: "Enter batch id",
+      type: "select", // 🔥 IMPORTANT
+      options: batches, // 🔥 API DATA
       mandatory: true,
     },
   ];
@@ -236,6 +255,8 @@ const StudentsEntry = () => {
           searchText={searchText}
         />
       </div>
+
+      {/* EDIT MODAL */}
       <TabModal
         open={editOpen}
         handleClose={() => setEditOpen(false)}
@@ -248,7 +269,7 @@ const StudentsEntry = () => {
                 setData={setEditData}
                 onSuccess={() => {
                   setEditOpen(false);
-                  fetchStudents(); 
+                  fetchStudents();
                 }}
               />
             ),

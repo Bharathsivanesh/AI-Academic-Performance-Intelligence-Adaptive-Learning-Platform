@@ -18,7 +18,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const PermTracking = () => {
   const router = useRouter();
-
+  const [subjects, setSubjects] = useState([]);
   const [filters, setFilters] = useState({
     subject: "",
   });
@@ -28,11 +28,28 @@ const PermTracking = () => {
 
   // 🔥 HANDLE FILTER CHANGE
   const handleChange = (e) => {
-    const updated = { ...filters, [e.target.name]: e.target.value };
+    const updated = {
+      ...filters,
+      [e.target.name]: Number(e.target.value), // 🔥 important
+    };
     setFilters(updated);
   };
-
   // 🔥 API CALL
+  useEffect(() => {
+    apiService({
+      endpoint: "/api/subjects/?user=true", // 🔥 your API
+      method: "GET",
+      onSuccess: (res) => {
+        const formatted = res.map((sub) => ({
+          label: sub.subject_name,
+          value: sub.id,
+        }));
+
+        setSubjects(formatted);
+      },
+      onError: (err) => console.error(err),
+    });
+  }, []);
   useEffect(() => {
     if (!filters.subject) return;
 
@@ -127,10 +144,7 @@ const PermTracking = () => {
             value={filters.subject}
             onChange={handleChange}
             placeholder="Select Subject"
-            options={[
-              { label: "Computer Networks", value: "2" },
-              { label: "DBMS", value: "3" },
-            ]}
+            options={subjects}
           />
         </div>
       </div>
@@ -139,65 +153,62 @@ const PermTracking = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {/* LEFT CARD */}
         <div className="col-span-2 bg-[#111827] rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row gap-6 items-center sm:items-start border border-gray-800">
-  
-  {/* Circle */}
-  <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0">
-    
-    <div className="absolute inset-0 rounded-full border-16 border-gray-700"></div>
+          {/* Circle */}
+          <div className="relative w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0">
+            <div className="absolute inset-0 rounded-full border-16 border-gray-700"></div>
 
-    {/* 🔥 Dynamic Progress */}
-    {data && (
-      <div
-        className="absolute inset-0 rounded-full border-16 border-blue-500 border-t-transparent"
-        style={{
-          transform: `rotate(${(data.subject_overview.average_score / 100) * 360}deg)`,
-        }}
-      ></div>
-    )}
+            {/* 🔥 Dynamic Progress */}
+            {data && (
+              <div
+                className="absolute inset-0 rounded-full border-16 border-blue-500 border-t-transparent"
+                style={{
+                  transform: `rotate(${(data.subject_overview.average_score / 100) * 360}deg)`,
+                }}
+              ></div>
+            )}
 
-    {/* 🔥 Dynamic Percentage */}
-    <div className="absolute inset-0 flex items-center justify-center text-lg sm:text-xl font-bold">
-      {data ? `${Math.round(data.subject_overview.average_score)}%` : "--"}
-    </div>
-  </div>
+            {/* 🔥 Dynamic Percentage */}
+            <div className="absolute inset-0 flex items-center justify-center text-lg sm:text-xl font-bold">
+              {data
+                ? `${Math.round(data.subject_overview.average_score)}%`
+                : "--"}
+            </div>
+          </div>
 
-  {/* Text */}
-  <div className="space-y-3 sm:space-y-4 text-center sm:text-left">
-    
-    {/* 🔥 Subject Name */}
-    <h2 className="text-lg sm:text-xl font-semibold">
-      {filters.subject
-        ? "Selected Subject"
-        : "Select Subject"}
-    </h2>
+          {/* Text */}
+          <div className="space-y-3 sm:space-y-4 text-center sm:text-left">
+            {/* 🔥 Subject Name */}
+            <h2 className="text-lg sm:text-xl font-semibold">
+              {filters.subject ? "Selected Subject" : "Select Subject"}
+            </h2>
 
-    {/* 🔥 Difficulty */}
-    <span
-      className={`inline-block text-xs px-2 py-1 rounded-full ${
-        data?.subject_overview?.difficulty === "Easy"
-          ? "bg-green-500/20 text-green-400"
-          : data?.subject_overview?.difficulty === "Medium"
-          ? "bg-yellow-500/20 text-yellow-400"
-          : "bg-red-500/20 text-red-400"
-      }`}
-    >
-      {data?.subject_overview?.difficulty || "--"} Difficulty
-    </span>
+            {/* 🔥 Difficulty */}
+            <span
+              className={`inline-block text-xs px-2 py-1 rounded-full ${
+                data?.subject_overview?.difficulty === "Easy"
+                  ? "bg-green-500/20 text-green-400"
+                  : data?.subject_overview?.difficulty === "Medium"
+                    ? "bg-yellow-500/20 text-yellow-400"
+                    : "bg-red-500/20 text-red-400"
+              }`}
+            >
+              {data?.subject_overview?.difficulty || "--"} Difficulty
+            </span>
 
-    {/* 🔥 Description */}
-    <p className="text-gray-400 text-sm max-w-md">
-      A foundational course focusing on data organization, management,
-      and storage formats that enable efficient access and modification.
-    </p>
+            {/* 🔥 Description */}
+            <p className="text-gray-400 text-sm max-w-md">
+              A foundational course focusing on data organization, management,
+              and storage formats that enable efficient access and modification.
+            </p>
 
-    {/* 🔥 Batch Info */}
-    <p className="text-gray-500 text-xs">
-      {data
-        ? `Based on ${data.batch_trend.length} batch(es)`
-        : "Select subject to view insights"}
-    </p>
-  </div>
-</div>
+            {/* 🔥 Batch Info */}
+            <p className="text-gray-500 text-xs">
+              {data
+                ? `Based on ${data.batch_trend.length} batch(es)`
+                : "Select subject to view insights"}
+            </p>
+          </div>
+        </div>
         {/* RIGHT AI CARD */}
         {/* Right Card */}{" "}
         <div className="bg-gradient-to-br from-purple-700/40 to-indigo-700/40 rounded-xl p-6 border border-purple-800 space-y-4">

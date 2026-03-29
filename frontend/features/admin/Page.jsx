@@ -26,39 +26,54 @@ export default function AdminPage() {
   const [filters, setFilters] = useState({
     passoutYear: "",
   });
+  const [departments, setDepartments] = useState([]);
+  const [batches, setBatches] = useState([]);
   const handleEdit = (row) => {
     setEditData({
-       id: row.id,
+      id: row.id,
       staffName: row.name,
       registerNumber: row.employeeId,
       email: row.email,
-      department: row.department,
+      department: row.department, // ✅ DIRECTLY USE ID
       password: "",
     });
+
     setEditOpen(true);
   };
   const handleOpen = (row) => {
     setSelectedStaff(row);
     setAssignedBatch(true);
   };
+  useEffect(() => {
+    // existing APIs...
 
-  const handleClose = () => setAssignedBatch(false);
-  const handleUpdate = () => {
     apiService({
-      endpoint: `/api/admin/staff/${editData.id}/update/`,
-      method: "PUT",
-      payload: {
-        username: editData.registerNumber,
-        email: editData.email,
-        staff_name: editData.staffName,
-        department: editData.department,
+      endpoint: "/api/admin/departments/",
+      method: "GET",
+      onSuccess: (res) => {
+        const formatted = res.map((dept) => ({
+          label: dept.department_name, // show in UI
+          value: dept.id, // send to backend
+        }));
+        setDepartments(formatted);
       },
-      onSuccess: () => {
-        fetchStaffList();
-        setEditOpen(false);
-      },
+      onError: (err) => console.error(err),
     });
-  };
+    apiService({
+      endpoint: "/api/batches/",
+      method: "GET",
+      onSuccess: (res) => {
+        const formatted = res.map((batch) => ({
+          label: batch.batch_name, // 👈 show in dropdown
+          value: batch.id, // 👈 send to backend
+        }));
+        setBatches(formatted);
+      },
+      onError: (err) => console.error(err),
+    });
+  }, []);
+  const handleClose = () => setAssignedBatch(false);
+
   const handlefilterChange = (e) => {
     setFilters({
       ...filters,
@@ -113,6 +128,7 @@ export default function AdminPage() {
       onSuccess: () => {
         fetchStaffList(); // refresh
         setAssignedBatch(false);
+         setFilters({ passoutYear: "" });
       },
       onError: (err) => console.error(err),
     });
@@ -247,7 +263,14 @@ export default function AdminPage() {
     { name: "staffName", label: "Staff Name", mandatory: true },
     { name: "registerNumber", label: "Register Number", mandatory: true },
     { name: "email", label: "Email", mandatory: true },
-    { name: "department", label: "Department", mandatory: true },
+    {
+      name: "department",
+      label: "Department",
+      type: "select",
+      mandatory: true,
+      options: departments,
+      placeholder: "Select Department",
+    },
     { name: "password", label: "Password", mandatory: true },
   ];
 
@@ -314,17 +337,14 @@ export default function AdminPage() {
         >
           <h2 className="text-white text-lg mb-4">Assign Batch</h2>
 
-          <InputField
-            type="select"
-            name="passoutYear"
-            value={filters.passoutYear}
-            onChange={handlefilterChange}
-            options={[
-              { label: "2024-2028", value: 1 },
-              { label: "2025-2029", value: 2 },
-              { label: "2026-2030", value: 3 },
-            ]}
-          />
+         <InputField
+  type="select"
+  name="passoutYear"
+  value={filters.passoutYear}
+  onChange={handlefilterChange}
+  options={batches}                 // ✅ dynamic
+  placeholder="Select Batch"
+/>
 
           <div className="flex justify-end gap-3 mt-6">
             <Button variant="outlined" onClick={handleClose}>
@@ -344,25 +364,26 @@ export default function AdminPage() {
           </div>
         </Box>
       </Modal>
-    <TabModal
-  open={editOpen}
-  handleClose={() => setEditOpen(false)}
-  tabs={[
-    {
-      label: "Basic Info",
-      content: (
-        <EditStaffForm
-          data={editData}
-          setData={setEditData}
-          onSuccess={() => {
-            setEditOpen(false);
-            fetchStaffList(); // 🔥 refresh table
-          }}
-        />
-      ),
-    },
-  ]}
-/>
+      <TabModal
+        open={editOpen}
+        handleClose={() => setEditOpen(false)}
+        tabs={[
+          {
+            label: "Basic Info",
+            content: (
+              <EditStaffForm
+                departments={departments}
+                data={editData}
+                setData={setEditData}
+                onSuccess={() => {
+                  setEditOpen(false);
+                  fetchStaffList(); // 🔥 refresh table
+                }}
+              />
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }
