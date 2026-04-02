@@ -36,6 +36,12 @@ export const sidebarMenu = [
   path: "/staff/performance",
   role: "staff",
 },
+{
+  label: "Predictition",
+  icon: TrendingUpIcon,
+  path: "/staff/predict",
+  role: "staff",
+},
      {
   label: "Students",
   icon: SchoolIcon,
