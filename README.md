@@ -1,5 +1,5 @@
 📘 AI Academic Performance Intelligence System
-🚀 Overview
+🚀 Overview.
 
 The AI Academic Performance Intelligence System is a smart web-based platform designed to analyze, monitor, and predict student academic performance. It provides role-based access for Admin, Staff, and Students, enabling efficient academic management with AI-powered insights.
 
