@@ -12,13 +12,17 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { apiService } from "../../service/Apicall";
 import TabModal from "../../components/Tabmodal";
 import EditStudentForm from "./components.jsx/EditStudentForm";
+import Loader from "../../components/Loader";
+import { showToast } from "../../components/Notification";
 
 const StudentsEntry = () => {
   const [searchText, setSearchText] = useState("");
   const [students, setStudents] = useState([]);
-  const [batches, setBatches] = useState([]); // 🔥 NEW
+  const [batches, setBatches] = useState([]);
   const [editOpen, setEditOpen] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Loading...");
 
   const [formData, setFormData] = useState({
     student_name: "",
@@ -30,18 +34,25 @@ const StudentsEntry = () => {
 
   // ================= GET STUDENTS =================
   const fetchStudents = () => {
+    setLoadingMessage("Loading Student Directory...");
     apiService({
       endpoint: "/api/admin/students/",
       method: "GET",
-      onSuccess: (res) => setStudents(res),
-      onError: (err) => console.error(err),
+      setLoading: setIsLoading,
+      onSuccess: (res) => {
+        setStudents(res);
+      },
+      onError: (err) => {
+        console.error(err);
+        showToast("Failed to load students!", "error");
+      },
     });
   };
 
-  // ================= GET STAFF BATCHES =================
+  // ================= GET BATCHES (no loader) =================
   const fetchBatches = () => {
     apiService({
-      endpoint: "/api/staff/batches/", // 🔥 YOUR API
+      endpoint: "/api/staff/batches/",
       method: "GET",
       onSuccess: (res) => {
         const formatted = res.map((b) => ({
@@ -56,7 +67,7 @@ const StudentsEntry = () => {
 
   useEffect(() => {
     fetchStudents();
-    fetchBatches(); // 🔥 CALL HERE
+    fetchBatches();
   }, []);
 
   // ================= EDIT =================
@@ -68,7 +79,6 @@ const StudentsEntry = () => {
       email: row.email,
       batch: Number(row.batch.replace("Batch ", "")),
     });
-
     setEditOpen(true);
   };
 
@@ -76,14 +86,17 @@ const StudentsEntry = () => {
   const handleSubmit = () => {
     const payload = {
       ...formData,
-      batch: Number(formData.batch), // ✅ only batch
+      batch: Number(formData.batch),
     };
 
+    setLoadingMessage("Creating Student Account...");
     apiService({
       endpoint: "/api/admin/student/create/",
       method: "POST",
       payload: payload,
+      setLoading: setIsLoading,
       onSuccess: () => {
+        showToast("Student created successfully!", "success");
         fetchStudents();
         setFormData({
           student_name: "",
@@ -93,25 +106,33 @@ const StudentsEntry = () => {
           batch: "",
         });
       },
-      onError: (err) => console.error(err),
+      onError: (err) => {
+        console.error(err);
+        showToast("Failed to create student!", "error");
+      },
     });
   };
 
   // ================= DELETE =================
   const handleDelete = (id) => {
+    setLoadingMessage("Deleting Student...");
     apiService({
       endpoint: `/api/admin/students/${id}/delete/`,
       method: "DELETE",
-      onSuccess: () => fetchStudents(),
-      onError: (err) => console.error(err),
+      setLoading: setIsLoading,
+      onSuccess: () => {
+        showToast("Student deleted successfully!", "success");
+        fetchStudents();
+      },
+      onError: (err) => {
+        console.error(err);
+        showToast("Failed to delete student!", "error");
+      },
     });
   };
 
   const handleChange = (name, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   // ================= TABLE =================
@@ -142,18 +163,9 @@ const StudentsEntry = () => {
         </div>
       ),
     },
-    {
-      field: "employeeId",
-      label: "STUDENT ID",
-    },
-    {
-      field: "department",
-      label: "DEPARTMENT",
-    },
-    {
-      field: "batch",
-      label: "BATCH",
-    },
+    { field: "employeeId", label: "STUDENT ID" },
+    { field: "department", label: "DEPARTMENT" },
+    { field: "batch", label: "BATCH" },
     {
       label: "ACTIONS",
       render: (row) => (
@@ -201,14 +213,17 @@ const StudentsEntry = () => {
     {
       name: "batch",
       label: "Batch",
-      type: "select", // 🔥 IMPORTANT
-      options: batches, // 🔥 API DATA
+      type: "select",
+      options: batches,
       mandatory: true,
     },
   ];
 
   return (
     <div className="p-4 md:p-8 bg-[#0b1220] min-h-screen text-white overflow-x-hidden">
+      {/* ✅ Loader */}
+      <Loader isLoading={isLoading} message={loadingMessage} />
+
       <div className="flex flex-col gap-6">
         {/* Upload + Form */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -218,7 +233,6 @@ const StudentsEntry = () => {
             buttonText="Browse Files"
             onFileSelect={(file) => console.log(file)}
           />
-
           <div className="lg:col-span-2">
             <DynamicFormCard
               title="Manual Entry"
@@ -236,7 +250,6 @@ const StudentsEntry = () => {
           <h2 className="text-lg md:text-xl font-semibold">
             Existing Student Directory
           </h2>
-
           <div className="w-full sm:w-[320px]">
             <InputField
               placeholder="Search by name, ID or department.."

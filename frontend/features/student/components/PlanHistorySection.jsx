@@ -28,7 +28,7 @@ const StudyPlanTimeline = ({ plan, refreshPlans }) => {
       method: "POST",
       onSuccess: () => {
         const updatedDetails = localPlan.details.map((item) =>
-          item.id === id ? { ...item, is_completed: true } : item
+          item.id === id ? { ...item, is_completed: true } : item,
         );
 
         const newProgress = calculateProgress(updatedDetails);
@@ -50,14 +50,14 @@ const StudyPlanTimeline = ({ plan, refreshPlans }) => {
   };
 
   return (
-    <div className="bg-[#0b1325] text-white rounded-2xl p-6 md:p-10 mt-12">
-
+    <div className="bg-[#0b1325] text-white rounded-2xl p-6 md:p-10 ">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-6 mb-12">
         <div>
           <h2 className="text-xl font-semibold">{localPlan.plan_name}</h2>
           <p className="text-gray-400 text-sm">
-            Daily {localPlan.daily_hours} Hours • {localPlan.time_horizon_days} Days
+            Daily {localPlan.daily_hours} Hours • {localPlan.time_horizon_days}{" "}
+            Days
           </p>
         </div>
 
@@ -81,7 +81,6 @@ const StudyPlanTimeline = ({ plan, refreshPlans }) => {
 
       {/* Timeline */}
       <div className="relative">
-
         {/* Center line */}
         <div className="absolute left-4 md:left-1/2 md:-translate-x-1/2 top-0 h-full w-[3px] bg-white/10" />
 
@@ -94,7 +93,6 @@ const StudyPlanTimeline = ({ plan, refreshPlans }) => {
               className={`relative flex mb-10
                 ${isLeft ? "md:justify-start" : "md:justify-end"} justify-start`}
             >
-
               {/* Dot */}
               <div
                 className={`absolute left-4 md:left-1/2 md:-translate-x-1/2 w-4 h-4 rounded-full
@@ -106,7 +104,6 @@ const StudyPlanTimeline = ({ plan, refreshPlans }) => {
                 className={`ml-12 md:ml-0 md:w-1/2 relative z-10 ${isLeft ? "md:pr-10" : "md:pl-10"}`}
               >
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md">
-
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-xs text-blue-400 tracking-wider">
                       DAY {item.day_number}
@@ -124,7 +121,9 @@ const StudyPlanTimeline = ({ plan, refreshPlans }) => {
                     </div>
                   </div>
 
-                  <h3 className="text-lg font-semibold mb-2">{item.topic_name}</h3>
+                  <h3 className="text-lg font-semibold mb-2">
+                    {item.topic_name}
+                  </h3>
 
                   {/* ✅ Buttons for resources */}
                   <div className="flex gap-4 mt-2">
@@ -149,9 +148,10 @@ const StudyPlanTimeline = ({ plan, refreshPlans }) => {
 
                   {/* ✅ Completed label */}
                   {item.is_completed && (
-                    <span className="text-green-400 text-xs mt-2 block">✅ Completed</span>
+                    <span className="text-green-400 text-xs mt-2 block">
+                      ✅ Completed
+                    </span>
                   )}
-
                 </div>
               </div>
 
