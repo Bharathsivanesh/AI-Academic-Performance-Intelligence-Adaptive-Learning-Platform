@@ -17,77 +17,92 @@ import { Modal, Box, Button } from "@mui/material";
 import { apiService } from "../../service/Apicall";
 import TabModal from "../../components/Tabmodal";
 import EditStaffForm from "./components/EditStaffForm";
+import Loader from "../../components/Loader";
+import { showToast } from "../../components/Notification";
 
 export default function AdminPage() {
   const [AssignedBatch, setAssignedBatch] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
   const [editData, setEditData] = useState(null);
-  const [filters, setFilters] = useState({
-    passoutYear: "",
-  });
+  const [Loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Loading...");
+  const [filters, setFilters] = useState({ passoutYear: "" });
   const [departments, setDepartments] = useState([]);
   const [batches, setBatches] = useState([]);
+
   const handleEdit = (row) => {
     setEditData({
       id: row.id,
       staffName: row.name,
       registerNumber: row.employeeId,
       email: row.email,
-      department: row.department, // ✅ DIRECTLY USE ID
+      department: row.department,
       password: "",
     });
-
     setEditOpen(true);
   };
+
   const handleOpen = (row) => {
     setSelectedStaff(row);
     setAssignedBatch(true);
   };
-  useEffect(() => {
-    // existing APIs...
 
+  useEffect(() => {
+    setLoadingMessage("Fetching Departments...");
     apiService({
       endpoint: "/api/admin/departments/",
       method: "GET",
+      setLoading,
       onSuccess: (res) => {
         const formatted = res.map((dept) => ({
-          label: dept.department_name, // show in UI
-          value: dept.id, // send to backend
+          label: dept.department_name,
+          value: dept.id,
         }));
         setDepartments(formatted);
+        // showToast("Departments loaded!", "success");
       },
-      onError: (err) => console.error(err),
+      onError: (err) => {
+        console.error(err);
+        // showToast("Failed to load departments", "error");
+      },
     });
+
+    setLoadingMessage("Fetching Batches...");
     apiService({
       endpoint: "/api/batches/",
       method: "GET",
+      setLoading,
       onSuccess: (res) => {
         const formatted = res.map((batch) => ({
-          label: batch.batch_name, // 👈 show in dropdown
-          value: batch.id, // 👈 send to backend
+          label: batch.batch_name,
+          value: batch.id,
         }));
         setBatches(formatted);
+        // showToast("Batches loaded!", "success");
       },
-      onError: (err) => console.error(err),
+      onError: (err) => {
+        console.error(err);
+        // showToast("Failed to load batches", "error");
+      },
     });
   }, []);
+
   const handleClose = () => setAssignedBatch(false);
 
   const handlefilterChange = (e) => {
-    setFilters({
-      ...filters,
-      [e.target.name]: e.target.value,
-    });
+    setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
   // ===================== TABLE =====================
   const [TableRow, setTableRows] = useState([]);
 
   const fetchStaffList = () => {
+    setLoadingMessage("Loading Staff Directory...");
     apiService({
       endpoint: "/api/admin/staff/",
       method: "GET",
+      setLoading,
       onSuccess: (res) => {
         const formatted = res.map((item) => ({
           id: item.id,
@@ -98,39 +113,57 @@ export default function AdminPage() {
           batches: item.batches || [],
         }));
         setTableRows(formatted);
+        // showToast("Staff list updated!", "success");
       },
-      onError: (err) => console.error(err),
+      onError: (err) => {
+        console.error(err);
+        showToast("Failed to fetch staff list", "error");
+      },
     });
   };
 
   // ===================== DELETE =====================
   const handleDelete = (id) => {
+    setLoadingMessage("Deleting Staff Member...");
     apiService({
       endpoint: `/api/admin/staff/${id}/delete/`,
       method: "DELETE",
-      onSuccess: () => fetchStaffList(),
-      onError: (err) => console.error(err),
+      setLoading,
+      onSuccess: () => {
+        showToast("Staff deleted successfully!", "success");
+        fetchStaffList();
+      },
+      onError: (err) => {
+        console.error(err);
+        // showToast("Failed to delete staff", "error");
+      },
     });
   };
 
-  // ===================== ASSIGN BATCH API =====================
+  // ===================== ASSIGN BATCH =====================
   const handleAssignBatch = () => {
     if (!selectedStaff || !filters.passoutYear) return;
 
+    setLoadingMessage("Assigning Batch to Staff...");
     apiService({
       endpoint: "/api/admin/staff/assign-batch/",
       method: "POST",
+      setLoading,
       payload: {
         staff: selectedStaff.id,
         department: selectedStaff.department,
         batch: Number(filters.passoutYear),
       },
       onSuccess: () => {
-        fetchStaffList(); // refresh
+        showToast("Batch assigned successfully!", "success");
+        fetchStaffList();
         setAssignedBatch(false);
-         setFilters({ passoutYear: "" });
+        setFilters({ passoutYear: "" });
       },
-      onError: (err) => console.error(err),
+      onError: (err) => {
+        console.error(err);
+        // showToast("Failed to assign batch", "error");
+      },
     });
   };
 
@@ -152,7 +185,6 @@ export default function AdminPage() {
     },
     { field: "employeeId", label: "EMPLOYEE ID" },
     { field: "department", label: "DEPARTMENT" },
-
     {
       label: "BATCH",
       render: (row) => (
@@ -165,7 +197,6 @@ export default function AdminPage() {
               sx={{ backgroundColor: "#16a34a", color: "#fff" }}
             />
           ))}
-
           <button
             onClick={() => handleOpen(row)}
             className="flex items-center gap-1 px-2 py-1 text-xs bg-blue-600 text-white rounded-md"
@@ -176,7 +207,6 @@ export default function AdminPage() {
         </div>
       ),
     },
-
     {
       label: "ACTIONS",
       render: (row) => (
@@ -216,9 +246,11 @@ export default function AdminPage() {
   };
 
   const handleSubmit = () => {
+    setLoadingMessage("Creating Staff Account...");
     apiService({
       endpoint: "/api/admin/staff/create/",
       method: "POST",
+      setLoading,
       payload: {
         username: formData.registerNumber,
         email: formData.email,
@@ -227,17 +259,30 @@ export default function AdminPage() {
         department: formData.department,
       },
       onSuccess: () => {
+        showToast("Staff created successfully!", "success");
         fetchStaffList();
+        setFormData({
+          staffName: "",
+          registerNumber: "",
+          email: "",
+          department: "",
+          password: "",
+        });
       },
-      onError: (err) => console.error(err),
+      onError: (err) => {
+        console.error(err);
+        // showToast("Failed to create staff", "error");
+      },
     });
   };
 
   // ===================== LOAD =====================
   useEffect(() => {
+    setLoadingMessage("Fetching Dashboard Stats...");
     apiService({
       endpoint: "/api/admin/dashboard-stats/",
       method: "GET",
+      setLoading,
       onSuccess: (res) => {
         setStatsData([
           { title: "Total Staff", value: res.total_staff, icon: GroupsIcon },
@@ -252,6 +297,11 @@ export default function AdminPage() {
             icon: MenuBookIcon,
           },
         ]);
+        // showToast("Dashboard stats loaded!", "success");
+      },
+      onError: (err) => {
+        console.error(err);
+        // showToast("Failed to load dashboard stats", "error");
       },
     });
 
@@ -260,9 +310,24 @@ export default function AdminPage() {
 
   // ===================== UI =====================
   const staffFields = [
-    { name: "staffName", label: "Staff Name", mandatory: true },
-    { name: "registerNumber", label: "Register Number", mandatory: true },
-    { name: "email", label: "Email", mandatory: true },
+    {
+      name: "staffName",
+      label: "Staff Name",
+      mandatory: true,
+      placeholder: "Enter staff full name",
+    },
+    {
+      name: "registerNumber",
+      label: "Register Number",
+      mandatory: true,
+      placeholder: "Enter employee ID / register number",
+    },
+    {
+      name: "email",
+      label: "Email",
+      mandatory: true,
+      placeholder: "Enter official email address",
+    },
     {
       name: "department",
       label: "Department",
@@ -271,13 +336,21 @@ export default function AdminPage() {
       options: departments,
       placeholder: "Select Department",
     },
-    { name: "password", label: "Password", mandatory: true },
+    {
+      name: "password",
+      label: "Password",
+      type: "password",
+      mandatory: true,
+      placeholder: "Create a strong password",
+    },
   ];
-
   const [searchText, setSearchText] = useState("");
 
   return (
     <div className="p-8 bg-[#0b1220] min-h-screen text-white">
+      {/* ✅ Dynamic loader message */}
+      <Loader isLoading={Loading} message={loadingMessage} />
+
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {statsData.map((card, index) => (
@@ -291,7 +364,7 @@ export default function AdminPage() {
           </h2>
           <div>
             <InputField
-              placeholder="Search by name, email ...`"
+              placeholder="Search by name, email..."
               startIcon={<SearchIcon sx={{ color: "#9ca3af" }} />}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
@@ -307,7 +380,6 @@ export default function AdminPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <UploadCard title="Bulk Upload Staffs" />
-
           <div className="lg:col-span-2">
             <DynamicFormCard
               title="Manual Entry"
@@ -336,21 +408,18 @@ export default function AdminPage() {
           }}
         >
           <h2 className="text-white text-lg mb-4">Assign Batch</h2>
-
-         <InputField
-  type="select"
-  name="passoutYear"
-  value={filters.passoutYear}
-  onChange={handlefilterChange}
-  options={batches}                 // ✅ dynamic
-  placeholder="Select Batch"
-/>
-
+          <InputField
+            type="select"
+            name="passoutYear"
+            value={filters.passoutYear}
+            onChange={handlefilterChange}
+            options={batches}
+            placeholder="Select Batch"
+          />
           <div className="flex justify-end gap-3 mt-6">
             <Button variant="outlined" onClick={handleClose}>
               Cancel
             </Button>
-
             <Button
               sx={{
                 backgroundColor: "#0a4fe4",
@@ -364,6 +433,7 @@ export default function AdminPage() {
           </div>
         </Box>
       </Modal>
+
       <TabModal
         open={editOpen}
         handleClose={() => setEditOpen(false)}
@@ -377,7 +447,7 @@ export default function AdminPage() {
                 setData={setEditData}
                 onSuccess={() => {
                   setEditOpen(false);
-                  fetchStaffList(); // 🔥 refresh table
+                  fetchStaffList();
                 }}
               />
             ),

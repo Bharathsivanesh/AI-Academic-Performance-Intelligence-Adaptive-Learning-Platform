@@ -5,6 +5,8 @@ import InputField from "../../components/Inputfields";
 import HighPerformersCard from "./components.jsx/HighPerformersCard";
 import UnderPerformersCard from "./components.jsx/UnderPerformersCard";
 import { apiService } from "../../service/Apicall";
+import Loader from "@/components/Loader";
+import { showToast } from "@/components/Notification";
 
 const StudentPerformance = () => {
   const [filters, setFilters] = useState({
@@ -14,7 +16,11 @@ const StudentPerformance = () => {
   });
 
   const [data, setData] = useState(null);
-
+  // ✅ Add these states
+  const [Loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState(
+    "Fetching Performance Data...",
+  );
   // 🔥 Dynamic dropdown data
   const [batches, setBatches] = useState([]);
   const [subjects, setSubjects] = useState([]);
@@ -57,6 +63,7 @@ const StudentPerformance = () => {
     apiService({
       endpoint: `/api/subjects/${filters.subject}/topics/`,
       method: "GET",
+      setLoading,
       onSuccess: (res) => {
         const formatted = res.map((t) => ({
           label: t.topic_name,
@@ -91,18 +98,21 @@ const StudentPerformance = () => {
     apiService({
       endpoint: `/api/staff-dashboard/${query}`,
       method: "GET",
-      onSuccess: (res) => setData(res),
+      onSuccess: (res) => {
+        setData(res);
+        // showToast("Performance data loaded!", "success");
+      },
+
       onError: (err) => console.error(err),
     });
   }, [filters]);
 
   return (
     <div className="min-h-screen w-full bg-[#0b1220] p-6">
+      <Loader isLoading={Loading} message={loadingMessage} />
       <div className="bg-[#0b1624] flex flex-col h-full rounded-2xl shadow-lg">
-
         {/* 🔥 FILTERS */}
         <div className="flex flex-wrap items-end p-6 gap-6 border-b border-white/5">
-
           {/* Batch */}
           <div className="w-64">
             <p className="text-xs text-gray-400 mb-2">BATCH</p>

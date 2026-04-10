@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [role, setRole] = useState("superadmin");
+  const [Loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     id: "",
     password: "",
@@ -26,6 +27,7 @@ export default function LoginPage() {
       await apiService({
         endpoint: "/api/token/",
         method: "POST",
+        setLoading,
         payload: {
           email: form?.id,
           password: form?.password,
@@ -45,6 +47,7 @@ export default function LoginPage() {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center text-white px-4 bg-[#0b1220] overflow-hidden">
+      <Loader isLoading={Loading} message="Verifying Credentials..." />
       {/* <Loader visible={loading} /> sample loader  */}
 
       {/* Top Left Glow */}

@@ -5,13 +5,17 @@ import { useState, useEffect } from "react";
 import InputField from "@/components/Inputfields";
 import { supabase } from "../../../app/utils/supabaseClient";
 import { apiService } from "../../../service/Apicall";
+import Loader from "@/components/Loader";
+import { showToast } from "@/components/Notification";
 
 export default function ScheduleExamPage() {
   const [fileUrl, setFileUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Loading...");
 
   const [departments, setDepartments] = useState([]);
   const [batches, setBatches] = useState([]);
-  const [subjects, setSubjects] = useState([]); // ✅ NEW
+  const [subjects, setSubjects] = useState([]);
 
   const [examData, setExamData] = useState({
     department: "",
@@ -27,6 +31,9 @@ export default function ScheduleExamPage() {
     const file = e.target.files[0];
     if (!file) return;
 
+    setLoadingMessage("Uploading Excel File...");
+    setIsLoading(true);
+
     const fileName = `qn_co/${Date.now()}_${file.name}`;
 
     const { error } = await supabase.storage
@@ -34,7 +41,9 @@ export default function ScheduleExamPage() {
       .upload(fileName, file);
 
     if (error) {
-      console.log(error);
+      console.error(error);
+      showToast("File upload failed!", "error");
+      setIsLoading(false);
       return;
     }
 
@@ -43,11 +52,12 @@ export default function ScheduleExamPage() {
       .getPublicUrl(fileName);
 
     setFileUrl(publicData.publicUrl);
+    showToast("File uploaded successfully!", "success");
+    setIsLoading(false);
   };
 
   // ================= FETCH APIs =================
   useEffect(() => {
-    // Departments
     apiService({
       endpoint: "/api/admin/departments/",
       method: "GET",
@@ -60,7 +70,6 @@ export default function ScheduleExamPage() {
       },
     });
 
-    // Batches
     apiService({
       endpoint: "/api/batches/",
       method: "GET",
@@ -73,17 +82,13 @@ export default function ScheduleExamPage() {
       },
     });
 
-    // ✅ INITIAL SUBJECT LOAD (ALL)
     fetchSubjects();
   }, []);
 
   // ================= SUBJECT API =================
   const fetchSubjects = (departmentId = null) => {
     let url = "/api/subjects/";
-
-    if (departmentId) {
-      url += `?department=${departmentId}`;
-    }
+    if (departmentId) url += `?department=${departmentId}`;
 
     apiService({
       endpoint: url,
@@ -126,13 +131,12 @@ export default function ScheduleExamPage() {
 
     setExamData(updatedData);
 
-    // ✅ WHEN DEPARTMENT CHANGES → FETCH SUBJECTS
     if (name === "department") {
       fetchSubjects(value);
       setExamData((prev) => ({
         ...prev,
         department: Number(value),
-        subject: "", // reset subject
+        subject: "",
       }));
     }
   };
@@ -140,16 +144,18 @@ export default function ScheduleExamPage() {
   // ================= SUBMIT =================
   const handleSubmit = () => {
     if (!fileUrl) {
-      alert("Please upload file");
+      showToast("Please upload the Excel file first!", "error");
       return;
     }
 
+    setLoadingMessage("Scheduling Exam...");
     apiService({
       endpoint: "/api/admin/create-exam/",
       method: "POST",
+      setLoading: setIsLoading,
       payload: {
         exam_type: examData.examType,
-        subject: examData.subject, // ✅ dynamic now
+        subject: examData.subject,
         department: examData.department,
         batch: examData.batch,
         semester: examData.semester,
@@ -157,8 +163,7 @@ export default function ScheduleExamPage() {
         file_url: fileUrl,
       },
       onSuccess: (res) => {
-        console.log("Exam Created", res);
-
+        showToast("Exam scheduled successfully!", "success");
         setExamData({
           department: "",
           batch: "",
@@ -167,15 +172,20 @@ export default function ScheduleExamPage() {
           examType: "",
           examDate: "",
         });
-
         setFileUrl("");
       },
-      onError: (err) => console.error(err),
+      onError: (err) => {
+        console.error(err);
+        showToast("Failed to schedule exam!", "error");
+      },
     });
   };
 
   return (
     <div className="min-h-screen bg-[#0b1220] p-10 text-white">
+      {/* ✅ Loader - only for file upload + exam creation */}
+      <Loader isLoading={isLoading} message={loadingMessage} />
+
       {/* Header */}
       <div className="mb-10">
         <h1 className="text-3xl font-semibold">Schedule Examination</h1>
@@ -197,6 +207,7 @@ export default function ScheduleExamPage() {
             type="select"
             name="department"
             label="Department"
+            placeholder="Select Department"
             value={examData.department}
             onChange={handleExamChange}
             options={departments}
@@ -206,6 +217,7 @@ export default function ScheduleExamPage() {
             type="select"
             name="batch"
             label="Batch"
+            placeholder="Select Batch"
             value={examData.batch}
             onChange={handleExamChange}
             options={batches}
@@ -215,16 +227,17 @@ export default function ScheduleExamPage() {
             type="select"
             name="semester"
             label="Semester"
+            placeholder="Select Semester"
             value={examData.semester}
             onChange={handleExamChange}
             options={semesterOptions}
           />
 
-          {/* ✅ SUBJECT DROPDOWN FIXED */}
           <InputField
             type="select"
             name="subject"
             label="Subject"
+            placeholder="Select Subject"
             value={examData.subject}
             onChange={handleExamChange}
             options={subjects}
@@ -234,6 +247,7 @@ export default function ScheduleExamPage() {
             type="select"
             name="examType"
             label="Exam Type"
+            placeholder="Select Exam Type"
             value={examData.examType}
             onChange={handleExamChange}
             options={examTypeOptions}
@@ -247,10 +261,10 @@ export default function ScheduleExamPage() {
             onChange={handleExamChange}
           />
         </div>
-        {/* BUTTON */}
+
+        {/* FILE UPLOAD */}
         <div className="mt-8 border border-white/10 rounded-xl p-6">
           <h3 className="text-white text-lg mb-3">Upload Excel</h3>
-
           <input
             type="file"
             accept=".xlsx,.xls"
@@ -260,42 +274,42 @@ export default function ScheduleExamPage() {
               file:rounded-lg file:border-0
               file:bg-blue-600 file:text-white"
           />
+          {/* ✅ Show file uploaded confirmation */}
+          {fileUrl && (
+            <p className="mt-3 text-green-400 text-xs flex items-center gap-1">
+              ✅ File uploaded and ready
+            </p>
+          )}
         </div>
-        {/* Excel Format */}{" "}
+
+        {/* Excel Format */}
         <div className="mt-10">
-          {" "}
-          <p className="text-gray-400 text-sm mb-2">
-            {" "}
-            Required Excel Format{" "}
-          </p>{" "}
+          <p className="text-gray-400 text-sm mb-2">Required Excel Format</p>
           <table className="w-full text-sm border border-white/10 rounded-lg overflow-hidden">
-            {" "}
             <thead className="bg-[#0f1c2e] text-gray-300">
-              {" "}
               <tr>
-                {" "}
-                <th className="p-3 text-left">QN</th>{" "}
-                <th className="p-3 text-left">CO ID</th>{" "}
-              </tr>{" "}
-            </thead>{" "}
+                <th className="p-3 text-left">QN</th>
+                <th className="p-3 text-left">CO ID</th>
+              </tr>
+            </thead>
             <tbody className="text-gray-400">
-              {" "}
               <tr className="border-t border-white/10">
-                {" "}
-                <td className="p-3">1</td> <td className="p-3">CO1</td>{" "}
-              </tr>{" "}
+                <td className="p-3">1</td>
+                <td className="p-3">CO1</td>
+              </tr>
               <tr className="border-t border-white/10">
-                {" "}
-                <td className="p-3">2</td> <td className="p-3">CO2</td>{" "}
-              </tr>{" "}
+                <td className="p-3">2</td>
+                <td className="p-3">CO2</td>
+              </tr>
               <tr className="border-t border-white/10">
-                {" "}
-                <td className="p-3">3</td> <td className="p-3">CO3</td>{" "}
-              </tr>{" "}
-            </tbody>{" "}
-          </table>{" "}
+                <td className="p-3">3</td>
+                <td className="p-3">CO3</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        {/* BUTTON */}
+
+        {/* SUBMIT BUTTON */}
         <div className="flex justify-end mt-10">
           <Button
             onClick={handleSubmit}

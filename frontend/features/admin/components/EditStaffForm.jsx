@@ -3,19 +3,30 @@
 import InputField from "../../../components/Inputfields";
 import { Button } from "@mui/material";
 import { apiService } from "../../../service/Apicall";
+import { useState } from "react";
+import Loader from "../../../components/Loader";
+import { showToast } from "../../../components/Notification";
 
-
-export default function EditStaffForm({ data, setData, onSuccess ,departments}) {
+export default function EditStaffForm({
+  data,
+  setData,
+  onSuccess,
+  departments,
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Updating Staff...");
 
   const handleUpdate = () => {
     if (!data?.id) {
-      console.error("Missing staff ID");
+      showToast("Missing staff ID", "error");
       return;
     }
 
+    setLoadingMessage("Saving Staff Changes...");
     apiService({
       endpoint: `/api/admin/staff/${data.id}/update/`,
       method: "PATCH",
+      setLoading: setIsLoading,
       payload: {
         staff_name: data.staffName,
         username: data.registerNumber,
@@ -23,24 +34,23 @@ export default function EditStaffForm({ data, setData, onSuccess ,departments}) 
         department: data.department,
       },
       onSuccess: (res) => {
-        console.log("Updated Successfully", res);
-        onSuccess && onSuccess(); // close modal + refresh
+        showToast("Staff updated successfully!", "success");
+        onSuccess && onSuccess();
       },
       onError: (err) => {
         console.error("Update failed", err);
+        showToast("Failed to update staff", "error");
       },
     });
   };
 
   return (
     <div className="flex overflow-y-hidden flex-col gap-5 max-w-xl">
+      <Loader isLoading={isLoading} message={loadingMessage} />
 
-      <h2 className="text-lg font-semibold text-white">
-        Staff Details
-      </h2>
+      <h2 className="text-lg font-semibold text-white">Staff Details</h2>
 
       <div className="grid grid-cols-1 gap-4">
-
         <InputField
           label="Staff Name"
           value={data?.staffName || ""}
@@ -65,24 +75,21 @@ export default function EditStaffForm({ data, setData, onSuccess ,departments}) 
           }
         />
 
-       <InputField
-  label="Department"
-  type="select"                         // 🔥 IMPORTANT
-  name="department"
-  value={data?.department || ""}
-  options={departments}                 // 🔥 dynamic options
-  placeholder="Select Department"
-  onChange={(e) =>
-    setData((prev) => ({
-      ...prev,
-      department: e.target.value,       // 👈 will store ID
-    }))
-  }
-/>
+        <InputField
+          label="Department"
+          type="select"
+          name="department"
+          value={data?.department || ""}
+          options={departments}
+          placeholder="Select Department"
+          onChange={(e) =>
+            setData((prev) => ({ ...prev, department: e.target.value }))
+          }
+        />
       </div>
 
-      {/* ✅ SAVE BUTTON */}
-      <div className="flex justify-end ">
+      {/* Save Button */}
+      <div className="flex justify-end">
         <Button
           sx={{
             background: "linear-gradient(90deg,#2563eb,#3b82f6)",

@@ -1,10 +1,11 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import DashboardStatCard from "./components.jsx/DashboardStatCard";
 import PerformanceCharts from "./components.jsx/PerformanceCharts";
 import DashboardHeader from "./components.jsx/DashboardHeader";
+import Loader from "@/components/Loader";
+import { showToast } from "@/components/Notification";
 
 import SchoolIcon from "@mui/icons-material/School";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
@@ -12,37 +13,43 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { apiService } from "../../service/Apicall";
 
-
 const StaffPage = () => {
   const [dashboardData, setDashboardData] = useState(null);
-  const [batch, setBatch] = useState("1"); // 👈 default batch
+  const [batch, setBatch] = useState("1");
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Loading Dashboard...");
 
-  // 🔥 API CALL FUNCTION
+  // ================= FETCH =================
   const fetchDashboard = (selectedBatch) => {
+    setLoadingMessage("Fetching Dashboard Overview...");
     apiService({
       endpoint: `/api/staff/dashboard-overview/?batch=${selectedBatch}`,
       method: "GET",
+      setLoading: setIsLoading,
       onSuccess: (data) => {
         setDashboardData(data);
+        // showToast("Dashboard loaded!", "success");
       },
       onError: (err) => {
         console.error(err);
+        // showToast("Failed to load dashboard", "error");
       },
     });
   };
 
-  // 🔥 INITIAL LOAD
+  // ================= INITIAL LOAD =================
   useEffect(() => {
     fetchDashboard(batch);
   }, []);
 
-  // 🔥 FILTER CHANGE HANDLER
+  // ================= FILTER CHANGE =================
   const handleBatchChange = (value) => {
     setBatch(value);
+    setLoadingMessage("Updating Batch Data...");
     fetchDashboard(value);
   };
 
-  // 🔥 DYNAMIC STATS
+  // ================= STATS =================
   const statsData = dashboardData
     ? [
         {
@@ -78,22 +85,23 @@ const StaffPage = () => {
 
   return (
     <div className="bg-[#0b1220] px-4 min-h-screen">
-      {/* 🔥 HEADER */}
+      {/* ✅ Loader */}
+      <Loader isLoading={isLoading} message={loadingMessage} />
+
+      {/* Header */}
       <DashboardHeader onBatchChange={handleBatchChange} />
 
-      {/* 🔥 LOADING */}
-      {!dashboardData ? (
-        <div className="text-white p-10">Loading...</div>
-      ) : (
+      {/* Content */}
+      {!dashboardData ? null : (
         <>
-          {/* 🔥 CARDS */}
+          {/* Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
             {statsData.map((card, index) => (
               <DashboardStatCard key={index} {...card} />
             ))}
           </div>
 
-          {/* 🔥 CHARTS */}
+          {/* Charts */}
           <PerformanceCharts data={dashboardData} />
         </>
       )}

@@ -5,15 +5,11 @@ import { useEffect, useState } from "react";
 import InputField from "../../../components/Inputfields";
 import { Modal, Box } from "@mui/material";
 import { apiService } from "../../../service/Apicall";
+import Loader from "@/components/Loader";
+import { showToast } from "@/components/Notification";
 
 export default function DashboardHeader({ onBatchChange }) {
-
-  // ✅ HEADER FILTER (ONLY FOR DASHBOARD)
-  const [headerFilters, setHeaderFilters] = useState({
-    passoutYear: "",
-  });
-
-  // ✅ MODAL FILTER (ONLY FOR UPLOAD)
+  const [headerFilters, setHeaderFilters] = useState({ passoutYear: "" });
   const [modalFilters, setModalFilters] = useState({
     batch: "",
     semester: "",
@@ -24,10 +20,13 @@ export default function DashboardHeader({ onBatchChange }) {
   const [open, setOpen] = useState(false);
   const [batchOptions, setBatchOptions] = useState([]);
   const [subjectOptions, setSubjectOptions] = useState([]);
-
   const [examData, setExamData] = useState(null);
   const [examError, setExamError] = useState("");
   const [file, setFile] = useState(null);
+
+  // ✅ Loader states
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Loading...");
 
   /* ---------------- FETCH BATCHES ---------------- */
   useEffect(() => {
@@ -62,50 +61,41 @@ export default function DashboardHeader({ onBatchChange }) {
   /* ---------------- HEADER CHANGE ---------------- */
   const handleHeaderChange = (e) => {
     const { name, value } = e.target;
-
-    setHeaderFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    if (name === "passoutYear") {
-      onBatchChange(value);
-    }
+    setHeaderFilters((prev) => ({ ...prev, [name]: value }));
+    if (name === "passoutYear") onBatchChange(value);
   };
 
   /* ---------------- MODAL CHANGE ---------------- */
   const handleModalChange = (e) => {
     const { name, value } = e.target;
-
-    setModalFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // reset exam when filters change
+    setModalFilters((prev) => ({ ...prev, [name]: value }));
     setExamData(null);
     setExamError("");
   };
 
-  /* ---------------- GET EXAM ---------------- */
+  /* ---------------- GET EXAM ✅ ---------------- */
   const handleGetExam = () => {
     const { batch, semester, subject, exam_type } = modalFilters;
 
     if (!batch || !semester || !subject || !exam_type) {
-      alert("Fill all fields");
+      showToast("Please fill all fields!", "error");
       return;
     }
 
+    setLoadingMessage("Fetching Exam Details...");
     apiService({
       endpoint: `/api/staff/get-exam/?batch=${batch}&semester=${semester}&subject=${subject}&exam_type=${exam_type}`,
       method: "GET",
+      setLoading: setIsLoading,
       onSuccess: (res) => {
         setExamData(res);
         setExamError("");
+        showToast("Exam found successfully!", "success");
       },
       onError: (err) => {
         setExamData(null);
         setExamError(err?.error || "Exam not found");
+        showToast(err?.error || "Exam not found!", "error");
       },
     });
   };
@@ -117,21 +107,16 @@ export default function DashboardHeader({ onBatchChange }) {
 
   /* ---------------- RESET MODAL ---------------- */
   const resetModal = () => {
-    setModalFilters({
-      batch: "",
-      semester: "",
-      subject: "",
-      exam_type: "",
-    });
+    setModalFilters({ batch: "", semester: "", subject: "", exam_type: "" });
     setExamData(null);
     setExamError("");
     setFile(null);
   };
 
-  /* ---------------- UPLOAD ---------------- */
+  /* ---------------- UPLOAD MARKS ✅ ---------------- */
   const handleUpload = () => {
     if (!file || !examData?.exam_id) {
-      alert("Get exam first and select file");
+      showToast("Get exam first and select a file!", "error");
       return;
     }
 
@@ -139,39 +124,42 @@ export default function DashboardHeader({ onBatchChange }) {
     formData.append("exam_id", examData.exam_id);
     formData.append("file", file);
 
+    setLoadingMessage("Uploading Academic Marks...");
     apiService({
       endpoint: "/api/staff/upload-marks/",
       method: "POST",
       payload: formData,
+      setLoading: setIsLoading,
       onSuccess: () => {
-        alert("Uploaded successfully ✅");
+        showToast("Marks uploaded successfully!", "success");
         setOpen(false);
         resetModal();
       },
-      onError: () => alert("Upload failed ❌"),
+      onError: () => {
+        showToast("Failed to upload marks!", "error");
+      },
     });
   };
 
   return (
-    <div className="bg-gradient-to-r from-[#0f172a] to-[#111827] 
-                    p-5 rounded-2xl border border-white/5 mb-2">
+    <div className="bg-gradient-to-r from-[#0f172a] to-[#111827] p-5 rounded-2xl border border-white/5 mb-2">
+      {/* ✅ Loader - only for Get Exam + Upload Marks */}
+      <Loader isLoading={isLoading} message={loadingMessage} />
 
       {/* HEADER */}
       <div className="flex flex-wrap justify-between items-center gap-6">
-
         <div>
           <h1 className="text-xl md:text-2xl font-semibold text-white">
             Staff Performance Overview Dashboard
           </h1>
           <p className="text-gray-400 text-sm mt-1">
-            Academic Year {headerFilters.passoutYear || "----"} • Computer Science
+            Academic Year {headerFilters.passoutYear || "----"} • Computer
+            Science
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-
-          {/* ✅ HEADER BATCH */}
-          <div className="md:w-40 ">
+          <div className="md:w-40">
             <InputField
               type="select"
               name="passoutYear"
@@ -183,9 +171,7 @@ export default function DashboardHeader({ onBatchChange }) {
           </div>
 
           <button
-            className="flex cursor-pointer items-center gap-2 px-6 py-2 
-                       bg-blue-600 hover:bg-blue-700 
-                       rounded-xl text-white transition shadow-lg"
+            className="flex cursor-pointer items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-xl text-white transition shadow-lg"
             onClick={() => setOpen(true)}
           >
             <CloudUploadIcon fontSize="small" />
@@ -195,22 +181,20 @@ export default function DashboardHeader({ onBatchChange }) {
       </div>
 
       {/* MODAL */}
-      <Modal open={open} onClose={() => { setOpen(false); resetModal(); }}>
-        <Box className="absolute top-1/2 left-1/2
-                     -translate-x-1/2 -translate-y-1/2
-                     w-[720px] bg-[#111827]
-                     border border-white/10
-                     rounded-2xl shadow-2xl p-8">
-
+      <Modal
+        open={open}
+        onClose={() => {
+          setOpen(false);
+          resetModal();
+        }}
+      >
+        <Box className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] bg-[#111827] border border-white/10 rounded-2xl shadow-2xl p-8">
           <h2 className="text-xl font-semibold text-white mb-6">
             Upload Academic Marks
           </h2>
 
           <div className="space-y-5">
-
             <div className="grid grid-cols-2 gap-2">
-
-              {/* ✅ MODAL BATCH */}
               <InputField
                 type="select"
                 name="batch"
@@ -219,16 +203,17 @@ export default function DashboardHeader({ onBatchChange }) {
                 placeholder="Select Batch"
                 options={batchOptions}
               />
-
               <InputField
                 type="select"
                 name="semester"
                 value={modalFilters.semester}
                 onChange={handleModalChange}
                 placeholder="Select Semester"
-                options={[1,2,3,4,5,6,7,8].map(i => ({label:`SEM ${i}`, value:i}))}
+                options={[1, 2, 3, 4, 5, 6, 7, 8].map((i) => ({
+                  label: `SEM ${i}`,
+                  value: i,
+                }))}
               />
-
               <InputField
                 type="select"
                 name="subject"
@@ -237,7 +222,6 @@ export default function DashboardHeader({ onBatchChange }) {
                 placeholder="Select Subject"
                 options={subjectOptions}
               />
-
               <InputField
                 type="select"
                 name="exam_type"
@@ -252,44 +236,62 @@ export default function DashboardHeader({ onBatchChange }) {
                   { label: "SEM", value: "SEM" },
                 ]}
               />
-
             </div>
 
-            {/* SAME BELOW (no change) */}
-            <button onClick={handleGetExam} className="w-full cursor-pointer bg-blue-600 text-white py-2 rounded-lg">
+            {/* ✅ Get Exam Button */}
+            <button
+              onClick={handleGetExam}
+              className="w-full cursor-pointer bg-blue-600 text-white py-2 rounded-lg"
+            >
               Get Exam Details
             </button>
 
-            {examError && <div className="text-red-400 text-center">{examError}</div>}
+            {/* Error */}
+            {examError && (
+              <div className="text-red-400 text-center">{examError}</div>
+            )}
 
+            {/* Success */}
             {examData && (
               <div className="text-green-400 text-center">
                 Exam Found ✅ <br />
-                <a href={examData.file_url} target="_blank" className="underline">
+                <a
+                  href={examData.file_url}
+                  target="_blank"
+                  className="underline"
+                >
                   View / Download Excel
                 </a>
               </div>
             )}
 
+            {/* File Upload */}
             <div className="border-2 border-dashed border-blue-500/30 rounded-xl p-6 text-center">
               <label className="cursor-pointer text-blue-400">
                 Browse Excel File
                 <input type="file" hidden onChange={handleFileChange} />
               </label>
-
-             
             </div>
- {file && <p className="text-blue-400 mt-2">{file.name}</p>}
+
+            {file && <p className="text-blue-400 mt-2">📄 {file.name}</p>}
+
             <div className="flex justify-end gap-4 pt-4">
-              <button onClick={() => { setOpen(false); resetModal(); }} className="px-4   cursor-pointer py-2 rounded-lg bg-white/5 border text-gray-300">
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  resetModal();
+                }}
+                className="px-4 cursor-pointer py-2 rounded-lg bg-white/5 border text-gray-300"
+              >
                 Cancel
               </button>
-
-              <button onClick={handleUpload} className="px-6  cursor-pointer py-2 bg-blue-600 rounded-lg text-white">
+              <button
+                onClick={handleUpload}
+                className="px-6 cursor-pointer py-2 bg-blue-600 rounded-lg text-white"
+              >
                 Upload
               </button>
             </div>
-
           </div>
         </Box>
       </Modal>
