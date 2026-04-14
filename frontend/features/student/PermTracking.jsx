@@ -56,6 +56,15 @@ const PermTracking = () => {
         }));
 
         setSubjects(formatted);
+
+        // ✅ AUTO SELECT FIRST SUBJECT
+        if (formatted.length > 0) {
+          setFilters((prev) => ({
+            ...prev,
+            subject: formatted[0].value,
+          }));
+        }
+
         setLoading(false);
       },
       onError: (err) => {
@@ -142,6 +151,11 @@ const PermTracking = () => {
     }
   };
 
+  // ✅ GET SELECTED SUBJECT NAME
+  const selectedSubjectLabel =
+    subjects.find((s) => s.value === filters.subject)?.label || "";
+    
+
   return (
     <div className="bg-[#0B1120] text-white min-h-screen px-3 p-3 space-y-3">
       {/* HEADER */}
@@ -187,16 +201,20 @@ const PermTracking = () => {
           </div>
 
           <div className="space-y-3 sm:space-y-4 text-center sm:text-left">
+            {/* ✅ DYNAMIC SUBJECT NAME */}
             <h2 className="text-lg sm:text-xl font-semibold">
-              {filters.subject ? "Selected Subject" : "Select Subject"}
+              {selectedSubjectLabel || "Select Subject"}
             </h2>
 
             <span className="inline-block text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-400">
               {data?.subject_overview?.difficulty || "--"} Difficulty
             </span>
 
+            {/* ✅ DYNAMIC DESCRIPTION */}
             <p className="text-gray-400 text-sm max-w-md">
-             A foundational course focusing on data organization, management, and storage formats that enable efficient access and modification.s
+              {selectedSubjectLabel
+                ? `Insights and performance analysis for ${selectedSubjectLabel}.`
+                : "Select a subject to view detailed insights."}
             </p>
 
             <p className="text-gray-500 text-xs">
@@ -212,7 +230,10 @@ const PermTracking = () => {
           <h3 className="text-lg font-semibold">AI Smart Recommendation</h3>
 
           <p className="text-gray-300 text-sm">
-            Students find <span className="text-pink-400">Graphs</span>{" "}
+            Students find{" "}
+            <span className="text-pink-400">
+              {selectedSubjectLabel || "this subject"}
+            </span>{" "}
             difficult. Improve score by{" "}
             <span className="text-green-400">+15%</span>.
           </p>

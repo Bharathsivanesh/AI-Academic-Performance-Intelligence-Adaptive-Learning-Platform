@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MenuItem, TextField } from "@mui/material";
 import BoltIcon from "@mui/icons-material/Bolt";
 import { apiService } from "../../../service/Apicall";
@@ -10,8 +10,33 @@ const CreateCustomPlan = ({ refreshPlans }) => {
   const [duration, setDuration] = useState("");
   const [hours, setHours] = useState("");
   const [loading, setLoading] = useState(false);
+  const [subjects, setSubjects] = useState([]); // 👈 NEW
 
-  // ─── All logic unchanged ───────────────────────────────────────────────────
+  // ─── Fetch subjects on mount ───────────────────────────────────────────────
+  useEffect(() => {
+    apiService({
+      endpoint: "/api/subjects/?user=true",
+      method: "GET",
+      onSuccess: (res) => {
+        const formatted = res.map((sub) => ({
+          label: sub.subject_name,
+          value: sub.id,
+        }));
+        setSubjects(formatted);
+
+        // Auto-select first subject
+        if (formatted.length > 0) {
+          setSubject(formatted[0].value);
+        }
+      },
+      onError: (err) => {
+        console.error(err);
+        showToast("Failed to load subjects!", "error");
+      },
+    });
+  }, []);
+  // ──────────────────────────────────────────────────────────────────────────
+
   const handleCreatePlan = async () => {
     if (!subject || !duration || !hours) {
       showToast("Please fill all fields!", "error");
@@ -19,11 +44,16 @@ const CreateCustomPlan = ({ refreshPlans }) => {
     }
     setLoading(true);
     try {
+      // 👇 Get the label (subject name) for the selected subject id
+      const selectedSubjectName = subjects.find(
+        (s) => s.value === subject,
+      )?.label;
+
       const generatedPlanResponse = await apiService({
         endpoint: "/api/study-plan/",
         method: "POST",
         payload: {
-          subject,
+          subject: selectedSubjectName, // 👈 pass name to AI generation
           duration: parseInt(duration),
           dailyHours: parseInt(hours),
         },
@@ -34,7 +64,7 @@ const CreateCustomPlan = ({ refreshPlans }) => {
       const generatedPlan = JSON.parse(contentStr);
 
       const planData = {
-        subject: 1,
+        subject: subject, // 👈 pass id to save endpoint
         plan_name: generatedPlan.plan_name,
         time_horizon_days: generatedPlan.time_horizon_days,
         daily_hours: generatedPlan.daily_hours,
@@ -54,7 +84,7 @@ const CreateCustomPlan = ({ refreshPlans }) => {
         onSuccess: (res) => {
           showToast("Study plan created successfully!", "success");
           setLoading(false);
-          refreshPlans(); // parent handles modal close + refresh
+          refreshPlans();
         },
         onError: (err) => {
           console.error(err);
@@ -68,11 +98,20 @@ const CreateCustomPlan = ({ refreshPlans }) => {
       setLoading(false);
     }
   };
-  // ──────────────────────────────────────────────────────────────────────────
+  const inputStyle = {
+    "& .MuiOutlinedInput-root": {
+      color: "#fff",
+      backgroundColor: "#071525",
+      borderRadius: "10px",
+      "& fieldset": { borderColor: "rgba(255,255,255,0.08)" },
+      "&:hover fieldset": { borderColor: "#2563EB" },
+      "&.Mui-focused fieldset": { borderColor: "#2563EB" },
+    },
+    "& .MuiSvgIcon-root": { color: "#5b9cf6" },
+  };
 
   return (
     <div>
-      {/* Modal header text */}
       <div style={{ marginBottom: "20px" }}>
         <h2
           style={{
@@ -89,7 +128,7 @@ const CreateCustomPlan = ({ refreshPlans }) => {
         </p>
       </div>
 
-      {/* Subject field */}
+      {/* Subject field — now dynamic */}
       <div style={{ marginBottom: "16px" }}>
         <p
           style={{
@@ -110,13 +149,17 @@ const CreateCustomPlan = ({ refreshPlans }) => {
           size="small"
           sx={inputStyle}
         >
-          <MenuItem value="AI">AI</MenuItem>
-          <MenuItem value="DSA">DSA</MenuItem>
-          <MenuItem value="OS">OS</MenuItem>
+          {subjects.map((sub) => (
+            <MenuItem key={sub.value} value={sub.value}>
+              {" "}
+              {/* 👈 dynamic */}
+              {sub.label}
+            </MenuItem>
+          ))}
         </TextField>
       </div>
 
-      {/* Duration + Hours side by side */}
+      {/* Duration + Hours — unchanged */}
       <div
         style={{
           display: "grid",
@@ -150,7 +193,6 @@ const CreateCustomPlan = ({ refreshPlans }) => {
             <MenuItem value="30">30 Days</MenuItem>
           </TextField>
         </div>
-
         <div>
           <p
             style={{
@@ -178,7 +220,6 @@ const CreateCustomPlan = ({ refreshPlans }) => {
         </div>
       </div>
 
-      {/* Generate button */}
       <button
         onClick={handleCreatePlan}
         disabled={loading}
@@ -210,17 +251,4 @@ const CreateCustomPlan = ({ refreshPlans }) => {
     </div>
   );
 };
-
-const inputStyle = {
-  "& .MuiOutlinedInput-root": {
-    color: "#fff",
-    backgroundColor: "#071525",
-    borderRadius: "10px",
-    "& fieldset": { borderColor: "rgba(255,255,255,0.08)" },
-    "&:hover fieldset": { borderColor: "#2563EB" },
-    "&.Mui-focused fieldset": { borderColor: "#2563EB" },
-  },
-  "& .MuiSvgIcon-root": { color: "#5b9cf6" },
-};
-
 export default CreateCustomPlan;

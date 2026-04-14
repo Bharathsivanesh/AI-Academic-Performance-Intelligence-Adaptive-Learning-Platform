@@ -9,13 +9,109 @@ import Loader from "../../components/Loader";
 import { showToast } from "../../components/Notification";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
+// ── Empty state ──────────────────────────────────────────────
+const EmptyPlans = ({ onCreateClick }) => (
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "18px",
+      padding: "56px 24px",
+      margin: "0 0 1.5rem",
+      borderRadius: "20px",
+      border: "1.5px dashed #1e3a5a",
+      background:
+        "radial-gradient(ellipse at 50% 0%, rgba(37,99,235,0.07) 0%, transparent 70%)",
+      textAlign: "center",
+    }}
+  >
+    {/* Animated icon ring */}
+    <div
+      style={{
+        width: "76px",
+        height: "76px",
+        borderRadius: "50%",
+        background: "rgba(91,156,246,0.08)",
+        border: "1.5px solid rgba(91,156,246,0.18)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        animation: "pulse-ring 2.4s ease-in-out infinite",
+      }}
+    >
+      <AutoStoriesIcon style={{ fontSize: "32px", color: "#5b9cf6" }} />
+    </div>
+
+    <div>
+      <p
+        style={{
+          fontSize: "16px",
+          fontWeight: "600",
+          color: "#c8d9f0",
+          margin: "0 0 6px",
+          letterSpacing: "0.01em",
+        }}
+      >
+        No study plans yet
+      </p>
+      <p
+        style={{
+          fontSize: "13px",
+          color: "#4a6a9a",
+          margin: 0,
+          maxWidth: "300px",
+          lineHeight: 1.6,
+        }}
+      >
+        Create your first custom study plan to start tracking your progress and
+        staying on top of your subjects.
+      </p>
+    </div>
+
+    <button
+      onClick={onCreateClick}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "7px",
+        padding: "10px 22px",
+        borderRadius: "12px",
+        background: "linear-gradient(90deg, #2563eb, #4f46e5)",
+        color: "#fff",
+        fontSize: "13px",
+        fontWeight: "500",
+        border: "none",
+        cursor: "pointer",
+        transition: "opacity 0.2s, transform 0.15s",
+        marginTop: "4px",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.opacity = "0.88";
+        e.currentTarget.style.transform = "translateY(-1px)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.opacity = "1";
+        e.currentTarget.style.transform = "translateY(0)";
+      }}
+    >
+      <AddCircleOutlineIcon style={{ fontSize: "16px" }} />
+      Create your first plan
+    </button>
+  </div>
+);
+
+// ────────────────────────────────────────────────────────────
 const PlanDetails = () => {
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false); // ← modal visibility
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const VISIBLE_CARDS = 3;
 
@@ -46,99 +142,110 @@ const PlanDetails = () => {
 
   const handlePlanCreated = () => {
     fetchPlans();
-    setIsModalOpen(false); // close modal after creation
+    setIsModalOpen(false);
   };
+
+  const hasPlans = plans.length > 0;
+  // Only show empty state after loading is done and no plans exist
+  const showEmpty = !isLoading && plans.length === 0;
 
   return (
     <div className="spd-page">
       {/* ── Header ── */}
-      <div className="spd-top-bar">
+      {/* <div className="spd-top-bar">
         <span className="spd-section-label">Recent Study Plans</span>
         <button className="spd-view-all">View all history →</button>
-      </div>
+      </div> */}
 
-      {/* ── Carousel ── */}
-      <div className="spd-carousel-wrap">
-        <button
-          className="spd-arrow-btn group"
-          disabled={!canPrev}
-          onClick={() => setCarouselIndex((i) => i - 1)}
-        >
-          <ArrowBackIosNewIcon
-            className="text-blue-300 group-hover:text-blue-400 group-hover:scale-110 transition-all duration-200"
-            style={{ fontSize: "16px" }}
-          />
-        </button>
+      {/* ── Carousel (only when plans exist) ── */}
+      {hasPlans && (
+        <div className="spd-carousel-wrap">
+          <button
+            className="spd-arrow-btn group"
+            disabled={!canPrev}
+            onClick={() => setCarouselIndex((i) => i - 1)}
+          >
+            <ArrowBackIosNewIcon
+              className="text-blue-300 group-hover:text-blue-400 group-hover:scale-110 transition-all duration-200"
+              style={{ fontSize: "16px" }}
+            />
+          </button>
 
-        <div className="spd-track-outer">
-          <div
-            className="spd-track"
+          <div className="spd-track-outer">
+            <div
+              className="spd-track"
+              style={{
+                transform: `translateX(calc(-${carouselIndex} * (272px + 12px)))`,
+              }}
+            >
+              {plans.map((plan) => {
+                const isActive = selectedPlan?.id === plan.id;
+                return (
+                  <div
+                    key={plan.id}
+                    onClick={() => setSelectedPlan(plan)}
+                    className={`spd-card-wrapper ${isActive ? "spd-card-active" : ""}`}
+                  >
+                    <StudyPlanCard
+                      subject={`Subject ${plan.subject}`}
+                      title={plan.plan_name}
+                      progress={plan.overall_progress}
+                      status={plan.status}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <button
+            className="spd-arrow-btn group"
+            disabled={!canNext}
+            onClick={() => setCarouselIndex((i) => i + 1)}
+          >
+            <ArrowForwardIosIcon
+              className="text-blue-300 group-hover:text-blue-400 transition"
+              style={{ fontSize: "16px" }}
+            />
+          </button>
+        </div>
+      )}
+
+      {/* ── Empty State ── */}
+      {showEmpty && <EmptyPlans onCreateClick={() => setIsModalOpen(true)} />}
+
+      {/* ── Create Plan Button (hidden when empty state shows its own CTA) ── */}
+      {hasPlans && (
+        <div className="px-10" style={{ marginBottom: "1.5rem" }}>
+          <button
+            onClick={() => setIsModalOpen(true)}
             style={{
-              transform: `translateX(calc(-${carouselIndex} * (272px + 12px)))`,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "10px 22px",
+              borderRadius: "12px",
+              background: "linear-gradient(90deg, #2563eb, #4f46e5)",
+              color: "#fff",
+              fontSize: "14px",
+              fontWeight: "500",
+              border: "none",
+              cursor: "pointer",
+              transition: "opacity 0.2s, transform 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "0.88";
+              e.currentTarget.style.transform = "translateY(-1px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "1";
+              e.currentTarget.style.transform = "translateY(0)";
             }}
           >
-            {plans.map((plan) => {
-              const isActive = selectedPlan?.id === plan.id;
-              return (
-                <div
-                  key={plan.id}
-                  onClick={() => setSelectedPlan(plan)}
-                  className={`spd-card-wrapper ${isActive ? "spd-card-active" : ""}`}
-                >
-                  <StudyPlanCard
-                    subject={`Subject ${plan.subject}`}
-                    title={plan.plan_name}
-                    progress={plan.overall_progress}
-                    status={plan.status}
-                  />
-                </div>
-              );
-            })}
-          </div>
+            ⚡ Create Custom Plan
+          </button>
         </div>
-
-        <button
-          className="spd-arrow-btn group"
-          disabled={!canNext}
-          onClick={() => setCarouselIndex((i) => i + 1)}
-        >
-          <ArrowForwardIosIcon
-            className="text-blue-300 group-hover:text-blue-400 transition"
-            style={{ fontSize: "16px" }}
-          />
-        </button>
-      </div>
-
-      {/* ── Create Plan Button (replaces inline form) ── */}
-      <div className="px-10" style={{ marginBottom: "1.5rem" }}>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "10px 22px",
-            borderRadius: "12px",
-            background: "linear-gradient(90deg, #2563eb, #4f46e5)",
-            color: "#fff",
-            fontSize: "14px",
-            fontWeight: "500",
-            border: "none",
-            cursor: "pointer",
-            transition: "opacity 0.2s, transform 0.15s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = "0.88";
-            e.currentTarget.style.transform = "translateY(-1px)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = "1";
-            e.currentTarget.style.transform = "translateY(0)";
-          }}
-        >
-          ⚡ Create Custom Plan
-        </button>
-      </div>
+      )}
 
       {/* ── Modal Overlay ── */}
       {isModalOpen && (
@@ -169,7 +276,6 @@ const PlanDetails = () => {
               position: "relative",
             }}
           >
-            {/* Modal close button */}
             <button
               onClick={() => setIsModalOpen(false)}
               style={{
@@ -187,7 +293,6 @@ const PlanDetails = () => {
               ✕
             </button>
 
-            {/* Pass handlePlanCreated so modal closes after creation */}
             <CreateCustomPlan refreshPlans={handlePlanCreated} />
           </div>
         </div>
@@ -206,6 +311,11 @@ const PlanDetails = () => {
           to   { opacity: 1; transform: scale(1) translateY(0); }
         }
 
+        @keyframes pulse-ring {
+          0%, 100% { box-shadow: 0 0 0 0px rgba(91,156,246,0.18); }
+          50%       { box-shadow: 0 0 0 10px rgba(91,156,246,0.0); }
+        }
+
         .spd-page {
           width: 100%;
           padding: 1.75rem 1.5rem;
@@ -214,7 +324,6 @@ const PlanDetails = () => {
           font-family: 'DM Sans', 'Segoe UI', sans-serif;
         }
 
-        /* top bar */
         .spd-top-bar {
           display: flex;
           justify-content: space-between;
@@ -237,7 +346,6 @@ const PlanDetails = () => {
         }
         .spd-view-all:hover { text-decoration: underline; }
 
-        /* carousel */
         .spd-carousel-wrap {
           display: flex;
           align-items: center;
@@ -277,7 +385,6 @@ const PlanDetails = () => {
           transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* card wrapper — hover + active */
         .spd-card-wrapper {
           flex: 0 0 272px;
           cursor: pointer;

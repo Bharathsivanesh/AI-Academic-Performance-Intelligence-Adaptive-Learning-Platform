@@ -5,15 +5,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { Box, Typography } from "@mui/material";
 import { sidebarMenu } from "../app/utils/Jsons/Sidebaradmin";
 
-export default function Sidebar({role}) {
+export default function Sidebar({ role }) {
   const pathname = usePathname();
   const router = useRouter();
-const filteredMenu = sidebarMenu.filter(
-  (item) => item.role === role
-);
+  const filteredMenu = sidebarMenu.filter((item) => item.role === role);
   return (
     <Box className="w-64 h-full bg-[#0B1120] flex flex-col justify-between p-4 border-r border-white/5">
-      
       {/* 🔹 TOP SECTION */}
       <Box className="mb-8 p-3">
         <div className="flex items-center gap-3 mb-2">
@@ -25,7 +22,7 @@ const filteredMenu = sidebarMenu.filter(
               AI Academic
             </Typography>
             <Typography className="text-gray-400 whitespace-nowrap text-xs">
-              Super Admin Panel
+              {role.charAt(0).toUpperCase() + role.slice(1)} Panel
             </Typography>
           </div>
         </div>
@@ -54,7 +51,6 @@ const filteredMenu = sidebarMenu.filter(
           );
         })}
       </Box>
-
     </Box>
   );
 }
