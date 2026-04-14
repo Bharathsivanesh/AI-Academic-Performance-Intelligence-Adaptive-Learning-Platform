@@ -123,11 +123,11 @@ export default function Navbar({
           />
 
           {/* NOTIFICATION */}
-          <IconButton onClick={handleOpenNotification}>
+          {/* <IconButton onClick={handleOpenNotification}>
             <Badge badgeContent={notifications.length} color="error">
               <NotificationsIcon sx={{ color: "#ffffff" }} />
             </Badge>
-          </IconButton>
+          </IconButton> */}
 
           {/* USER */}
           <div className="flex items-center gap-3 border-l border-white/10 pl-4 md:pl-6">

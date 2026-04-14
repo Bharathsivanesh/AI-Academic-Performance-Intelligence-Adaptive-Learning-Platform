@@ -10,11 +10,12 @@ import { showToast } from "@/components/Notification";
 
 export default function DashboardHeader({ onBatchChange }) {
   const [headerFilters, setHeaderFilters] = useState({ passoutYear: "" });
+
   const [modalFilters, setModalFilters] = useState({
     batch: "",
-    semester: "",
+    semester: 1, // ✅ default
     subject: "",
-    exam_type: "",
+    exam_type: "IAT1", // ✅ default
   });
 
   const [open, setOpen] = useState(false);
@@ -24,7 +25,6 @@ export default function DashboardHeader({ onBatchChange }) {
   const [examError, setExamError] = useState("");
   const [file, setFile] = useState(null);
 
-  // ✅ Loader states
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Loading...");
 
@@ -38,7 +38,25 @@ export default function DashboardHeader({ onBatchChange }) {
           label: b.batch_name,
           value: b.id,
         }));
+
         setBatchOptions(formatted);
+
+        // ✅ AUTO SELECT HEADER + MODAL BATCH
+        if (formatted.length > 0) {
+          const firstBatch = formatted[0].value;
+
+          setHeaderFilters((prev) => ({
+            ...prev,
+            passoutYear: firstBatch,
+          }));
+
+          setModalFilters((prev) => ({
+            ...prev,
+            batch: firstBatch,
+          }));
+
+          onBatchChange(firstBatch);
+        }
       },
     });
   }, []);
@@ -53,7 +71,16 @@ export default function DashboardHeader({ onBatchChange }) {
           label: s.subject_name,
           value: s.id,
         }));
+
         setSubjectOptions(formatted);
+
+        // ✅ AUTO SELECT SUBJECT
+        if (formatted.length > 0) {
+          setModalFilters((prev) => ({
+            ...prev,
+            subject: formatted[0].value,
+          }));
+        }
       },
     });
   }, []);
@@ -61,19 +88,30 @@ export default function DashboardHeader({ onBatchChange }) {
   /* ---------------- HEADER CHANGE ---------------- */
   const handleHeaderChange = (e) => {
     const { name, value } = e.target;
+
     setHeaderFilters((prev) => ({ ...prev, [name]: value }));
-    if (name === "passoutYear") onBatchChange(value);
+
+    if (name === "passoutYear") {
+      onBatchChange(value);
+
+      // sync modal batch also
+      setModalFilters((prev) => ({
+        ...prev,
+        batch: value,
+      }));
+    }
   };
 
   /* ---------------- MODAL CHANGE ---------------- */
   const handleModalChange = (e) => {
     const { name, value } = e.target;
+
     setModalFilters((prev) => ({ ...prev, [name]: value }));
     setExamData(null);
     setExamError("");
   };
 
-  /* ---------------- GET EXAM ✅ ---------------- */
+  /* ---------------- GET EXAM ---------------- */
   const handleGetExam = () => {
     const { batch, semester, subject, exam_type } = modalFilters;
 
@@ -107,13 +145,17 @@ export default function DashboardHeader({ onBatchChange }) {
 
   /* ---------------- RESET MODAL ---------------- */
   const resetModal = () => {
-    setModalFilters({ batch: "", semester: "", subject: "", exam_type: "" });
+    setModalFilters((prev) => ({
+      ...prev,
+      semester: 1,
+      exam_type: "IAT1",
+    }));
     setExamData(null);
     setExamError("");
     setFile(null);
   };
 
-  /* ---------------- UPLOAD MARKS ✅ ---------------- */
+  /* ---------------- UPLOAD MARKS ---------------- */
   const handleUpload = () => {
     if (!file || !examData?.exam_id) {
       showToast("Get exam first and select a file!", "error");
@@ -143,7 +185,6 @@ export default function DashboardHeader({ onBatchChange }) {
 
   return (
     <div className="bg-gradient-to-r from-[#0f172a] to-[#111827] p-5 rounded-2xl border border-white/5 mb-2">
-      {/* ✅ Loader - only for Get Exam + Upload Marks */}
       <Loader isLoading={isLoading} message={loadingMessage} />
 
       {/* HEADER */}
@@ -238,7 +279,6 @@ export default function DashboardHeader({ onBatchChange }) {
               />
             </div>
 
-            {/* ✅ Get Exam Button */}
             <button
               onClick={handleGetExam}
               className="w-full cursor-pointer bg-blue-600 text-white py-2 rounded-lg"
@@ -246,12 +286,10 @@ export default function DashboardHeader({ onBatchChange }) {
               Get Exam Details
             </button>
 
-            {/* Error */}
             {examError && (
               <div className="text-red-400 text-center">{examError}</div>
             )}
 
-            {/* Success */}
             {examData && (
               <div className="text-green-400 text-center">
                 Exam Found ✅ <br />
@@ -265,7 +303,6 @@ export default function DashboardHeader({ onBatchChange }) {
               </div>
             )}
 
-            {/* File Upload */}
             <div className="border-2 border-dashed border-blue-500/30 rounded-xl p-6 text-center">
               <label className="cursor-pointer text-blue-400">
                 Browse Excel File
