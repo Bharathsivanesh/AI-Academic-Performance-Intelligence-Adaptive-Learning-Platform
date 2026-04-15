@@ -168,7 +168,7 @@ const Studentpage = () => {
               </button>
             </div>
             <div className="flex-1 min-h-0">
-              <Chatbot />
+              <Chatbot id={dashboardData?.student_id} />
             </div>
           </div>
         </div>

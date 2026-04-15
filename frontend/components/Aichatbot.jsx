@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 
-export default function Chatbot() {
+export default function Chatbot({ id }) {
   const [messages, setMessages] = useState([
     { role: "ai", text: "Hello! I'm your AI assistant. Ask me anything 👋" },
   ]);
@@ -13,14 +13,12 @@ export default function Chatbot() {
 
   const bottomRef = useRef(null);
   const textareaRef = useRef(null);
-  const student_id = 2;
-
   /* ── real API call (unchanged) ── */
   const getAIResponse = async (userMessage) => {
     try {
       setLoading(true);
       const res = await fetch(
-        `http://127.0.0.1:8000/ask?question=${encodeURIComponent(userMessage)}&student_id=${student_id}`,
+        `http://127.0.0.1:8001/ask?question=${encodeURIComponent(userMessage)}&student_id=${id}`,
       );
       const data = await res.json();
       return data.answer || "No response from AI";
@@ -246,7 +244,6 @@ export default function Chatbot() {
               </div>
             </div>
           </div>
-         
         </div>
 
         {/* ── MESSAGES ── */}
