@@ -141,8 +141,8 @@ const StudentsEntry = () => {
     name: s.student_name,
     email: s.email,
     employeeId: s.username,
-    department: `Dept ${s.department}`,
-    batch: `Batch ${s.batch}`,
+    department: s.department_name,
+    batch: s.batch_name,
   }));
 
   const columns = [
@@ -163,6 +163,7 @@ const StudentsEntry = () => {
         </div>
       ),
     },
+    { field: "id", label: "Student Mark ID" },
     { field: "employeeId", label: "STUDENT ID" },
     { field: "department", label: "DEPARTMENT" },
     { field: "batch", label: "BATCH" },

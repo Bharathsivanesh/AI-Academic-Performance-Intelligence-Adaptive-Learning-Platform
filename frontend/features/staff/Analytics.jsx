@@ -3,28 +3,24 @@
 import { useEffect, useState } from "react";
 import InputField from "../../components/Inputfields";
 import ClassProficiencyChart from "./components.jsx/ClassSubjectPerformanceChart";
-import TopicMasteryChart from "./components.jsx/TopicMasteryChart";
 import { apiService } from "../../service/Apicall";
 import Loader from "@/components/Loader";
 import { showToast } from "@/components/Notification";
+import EmptyState from "./components.jsx/EmptyState";
 
 const StudentAnalytics = () => {
   const [filters, setFilters] = useState({ batch: "", subject: "" });
   const [data, setData] = useState(null);
   const [batchOptions, setBatchOptions] = useState([]);
   const [subjectOptions, setSubjectOptions] = useState([]);
-
-  // ✅ Loader only for analytics API
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Analyzing Data...");
 
-  // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
     const updated = { ...filters, [e.target.name]: e.target.value };
     setFilters(updated);
   };
 
-  // ================= FETCH BATCHES (no loader) =================
   useEffect(() => {
     apiService({
       endpoint: "/api/staff/batches/",
@@ -40,7 +36,6 @@ const StudentAnalytics = () => {
     });
   }, []);
 
-  // ================= FETCH SUBJECTS (no loader) =================
   useEffect(() => {
     apiService({
       endpoint: "/api/subjects/?user=true",
@@ -56,7 +51,6 @@ const StudentAnalytics = () => {
     });
   }, []);
 
-  // ================= ANALYTICS API ✅ (loader + toast) =================
   useEffect(() => {
     if (filters.batch && filters.subject) {
       setLoadingMessage("Fetching Topic Analytics...");
@@ -78,7 +72,6 @@ const StudentAnalytics = () => {
 
   return (
     <div className="w-full h-screen p-4 md:p-6">
-      {/* ✅ Loader - only for analytics filter API */}
       <Loader isLoading={isLoading} message={loadingMessage} />
 
       <div className="flex flex-col min-h-full rounded-2xl shadow-lg bg-[#0B1120]">
@@ -117,14 +110,13 @@ const StudentAnalytics = () => {
           </div>
         </div>
 
-        {/* CHARTS */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-2 md:p-6 flex-1">
-          <div className="w-full">
+        {/* CHART — full width now */}
+        <div className="p-2 md:p-6 flex-1">
+          {data ? (
             <ClassProficiencyChart data={data} />
-          </div>
-          <div className="w-full">
-            <TopicMasteryChart data={data} />
-          </div>
+          ) : (
+            <EmptyState batch={filters.batch} subject={filters.subject} />
+          )}
         </div>
       </div>
     </div>

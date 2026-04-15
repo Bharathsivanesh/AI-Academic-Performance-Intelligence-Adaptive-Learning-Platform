@@ -58,7 +58,6 @@ const Predictpage = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-        
           <span className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-[#0f1f14] border border-green-900 text-green-400">
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
             Live
@@ -111,6 +110,16 @@ const Predictpage = () => {
   );
 };
 
+const EmptyState = ({ message }) => {
+  return (
+    <div className="flex flex-col items-center justify-center py-10 text-center text-slate-500">
+      <div className="w-10 h-10 border border-slate-600 rounded-full flex items-center justify-center mb-3">
+        📊
+      </div>
+      <p className="text-sm">{message}</p>
+    </div>
+  );
+};
 const ListPanel = ({ title, color, count, children }) => {
   const isRed = color === "red";
   return (
@@ -129,7 +138,17 @@ const ListPanel = ({ title, color, count, children }) => {
         </span>
       </div>
       <div className="p-3 max-h-[420px] overflow-y-auto no-scrollbar space-y-2">
-        {children}
+        {count === 0 ? (
+          <EmptyState
+            message={
+              isRed
+                ? "No students at risk 🎉"
+                : "No safe students data available"
+            }
+          />
+        ) : (
+          children
+        )}
       </div>
     </div>
   );
